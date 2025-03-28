@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import spring.bricole.blueprints.IReviewable;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobCategory;
 import spring.bricole.common.JobStatus;
@@ -19,7 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job {
+public class Job implements IReviewable {
     // == fields ==
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,7 +63,9 @@ public class Job {
     private Map<Integer, ApplicationState> applicants = new HashMap<>();
 
 
-
+    // == Reviews ==
+    @OneToMany(mappedBy = "job")
+    private Set<Review> reviews = new HashSet<>();
 
 
     // == Constructor ==
@@ -99,5 +102,39 @@ public class Job {
 
     public void removeMission(String mission) {
         missions.remove(mission);
+    }
+
+    @Override
+    public Review addReview(User user, String content, int rating) throws InvalidPropertiesFormatException {
+        Review review = new Review();
+        review.setReviewerName(user.getFirstname() + " " + user.getLastname());
+        review.setContent(content);
+        if (rating > 5 || rating < 1)
+            throw new InvalidPropertiesFormatException("The rating should be between 1 and 5");
+        review.setRating(rating);
+        return null;
+    }
+
+    @Override
+    public Set<Review> getReviews() {
+        return this.reviews;
+    }
+
+    @Override
+    public double getAverageRating() {
+        double avg = 0.0;
+        if(reviews.isEmpty() )
+            return avg;
+        for(Review rev : reviews){
+            avg += rev.getRating();
+        }
+        return avg / reviews.size() ;
+    }
+
+    @Override
+    public int getReviewCount() {
+        if(reviews.isEmpty())
+            return 0;
+        return reviews.size();
     }
 }
