@@ -19,13 +19,16 @@ import java.util.List;
 public class Employer extends User{
 
 
-    @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL, orphanRemoval = true)
+
+
+    // In Employer.java
+    @OneToMany(mappedBy = "employer", fetch = FetchType.LAZY)
     private List<Job> jobOffers = new ArrayList<>();
 
     // Add helper method for bidirectional sync
     public void postJob(Job job) {
         jobOffers.add(job);
-        job.setEmployerId(this.getId());
+        job.setEmployer(this);
     }
     // == Constructor ==
     public Employer( String firstname,String lastname, String email, String password,

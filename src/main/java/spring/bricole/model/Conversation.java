@@ -33,9 +33,10 @@ public class Conversation {
     @Column(name="last_message_at")
     private LocalDateTime lastMessageAt;
 
-
-    @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conversation_id")
     private List<Message> messages = new ArrayList<>();
+
 
     // == Constructor ==
     public Conversation(User user1, User user2, String lastMessage, LocalDateTime lastMessageAt) {

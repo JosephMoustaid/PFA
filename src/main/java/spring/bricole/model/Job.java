@@ -38,8 +38,10 @@ public class Job {
     private float salary;
 
 
-    @Column(name = "employer_id", nullable = false)
-    private Integer employerId;
+    // In Job.java
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employer_id")
+    private Employer employer;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -58,6 +60,10 @@ public class Job {
     @Column(name = "application_state")
     @Enumerated(EnumType.STRING)
     private Map<Integer, ApplicationState> applicants = new HashMap<>();
+
+
+
+
 
     // == Constructor ==
     public Job(String title, String description, JobCategory category, JobStatus status, String location, float salary, Employer employer, LocalDateTime createdAt) {
