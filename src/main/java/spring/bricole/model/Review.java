@@ -28,12 +28,13 @@ public class Review {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    @ManyToOne
-    @JoinColumn(name="job_id", nullable = false)
-    private Job job;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewed_employee_id", nullable = false)
+    private Employee reviewedEmployee;
 
     @Column(name = "reviewer_id", nullable = false)
     private int reviewerId;
+
 
 
     // Constructors
@@ -41,7 +42,7 @@ public class Review {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Review(String reviewerName, String content, int rating, int entityId, String entityType) {
+    public Review(String reviewerName, String content, int rating) {
         this();
         this.reviewerName = reviewerName;
         this.content = content;

@@ -20,7 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "job")
-public class Job implements IReviewable {
+public class Job {
     // == fields ==
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,13 +63,16 @@ public class Job implements IReviewable {
     private Map<Integer, ApplicationState> applicants = new HashMap<>();
 
 
+
+
     // == Reviews ==
+    /*
     @OneToMany(mappedBy = "job")
     private Set<Review> reviews = new HashSet<>();
-
+    */
 
     // == Constructor ==
-    public Job(String title, String description, JobCategory category, JobStatus status, String location, float salary, Employer employer, LocalDateTime createdAt) {
+    public Job(String title, String description, JobCategory category, JobStatus status, String location, float salary, LocalDateTime createdAt) {
         this.title = title;
         this.description = description;
         this.category = category;
@@ -104,37 +107,5 @@ public class Job implements IReviewable {
         missions.remove(mission);
     }
 
-    @Override
-    public Review addReview(User user, String content, int rating) throws InvalidPropertiesFormatException {
-        Review review = new Review();
-        review.setReviewerName(user.getFirstname() + " " + user.getLastname());
-        review.setContent(content);
-        if (rating > 5 || rating < 1)
-            throw new InvalidPropertiesFormatException("The rating should be between 1 and 5");
-        review.setRating(rating);
-        return null;
-    }
 
-    @Override
-    public Set<Review> getReviews() {
-        return this.reviews;
-    }
-
-    @Override
-    public double getAverageRating() {
-        double avg = 0.0;
-        if(reviews.isEmpty() )
-            return avg;
-        for(Review rev : reviews){
-            avg += rev.getRating();
-        }
-        return avg / reviews.size() ;
-    }
-
-    @Override
-    public int getReviewCount() {
-        if(reviews.isEmpty())
-            return 0;
-        return reviews.size();
-    }
 }

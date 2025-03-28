@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import spring.bricole.blueprints.IReviewable;
 import spring.bricole.common.Availability;
 import spring.bricole.common.Gender;
 import spring.bricole.common.JobCategory;
@@ -19,7 +20,7 @@ import java.util.*;
 @Entity
 @Table(name = "employee")
 @PrimaryKeyJoinColumn(name = "user_id") // Changed from "id" to "user_id"
-public class Employee extends User {
+public class Employee extends User implements IReviewable {
 
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
@@ -36,6 +37,11 @@ public class Employee extends User {
     @Type(JsonBinaryType.class)
     @Column(columnDefinition = "jsonb")
     private List<JobCategory> jobPreferences = new ArrayList<>();
+
+
+    // == Reviews ==
+    @OneToMany(mappedBy = "reviewedEmployee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Review> reviews = new HashSet<>();
 
     public Employee(String firstname, String lastname, String email, String password,
                     int phoneNumberPrefix, String phoneNumber, String address, Gender gender,
@@ -69,5 +75,39 @@ public class Employee extends User {
 
     public void applyForJob(Job job) {
         job.addApplicant(this.getId());
+    }
+
+    @Override
+    public Review addReview(User user, String content, int rating) throws InvalidPropertiesFormatException {
+        Review review = new Review();
+        review.setReviewerName(user.getFirstname() + " " + user.getLastname());
+        review.setContent(content);
+        if (rating > 5 || rating < 1)
+            throw new InvalidPropertiesFormatException("The rating should be between 1 and 5");
+        review.setRating(rating);
+        return null;
+    }
+
+    @Override
+    public Set<Review> getReviews() {
+        return this.reviews;
+    }
+
+    @Override
+    public double getAverageRating() {
+        double avg = 0.0;
+        if(reviews.isEmpty() )
+            return avg;
+        for(Review rev : reviews){
+            avg += rev.getRating();
+        }
+        return avg / reviews.size() ;
+    }
+
+    @Override
+    public int getReviewCount() {
+        if(reviews.isEmpty())
+            return 0;
+        return reviews.size();
     }
 }
