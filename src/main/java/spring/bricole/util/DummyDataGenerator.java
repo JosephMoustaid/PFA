@@ -269,7 +269,7 @@ public class DummyDataGenerator {
             String message = notificationMessages[new Random().nextInt(notificationMessages.length)];
             LocalDateTime createdAt = LocalDateTime.now().minusHours(new Random().nextInt(72));
 
-            notifications.add(new Notification(message, sender, receiver, createdAt));
+            notifications.add(new Notification(message, receiver, createdAt));
         }
 
         return notifications;

@@ -1,11 +1,13 @@
 package spring.bricole.service;
 
+import org.springframework.stereotype.Service;
 import spring.bricole.model.Job;
 import spring.bricole.common.JobCategory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class Filter {
     List<Job> filterByCity(List<Job> jobs, String city) {
         return jobs.stream()

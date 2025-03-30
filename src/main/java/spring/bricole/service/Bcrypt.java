@@ -16,6 +16,4 @@ public class Bcrypt {
     public static boolean checkPassword(String plainTextPassword, String hashedPassword) {
         return BCrypt.checkpw(plainTextPassword, hashedPassword);
     }
-
-
 }

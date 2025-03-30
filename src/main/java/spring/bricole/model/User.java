@@ -1,5 +1,6 @@
 package spring.bricole.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,12 +39,10 @@ public class User {
 
     private String profilePicture;
 
-    // Notifications sent by this user (inverse side)
-    @OneToMany(mappedBy = "sender")
-    private List<Notification> sentNotifications = new ArrayList<>();
 
     // Notifications received by this user (inverse side)
     @OneToMany(mappedBy = "receiver")
+    @JsonIgnore // ← Break the cycle
     private List<Notification> receivedNotifications = new ArrayList<>();
 
     public User(String firstname, String lastname, String email, String password,
@@ -67,9 +66,9 @@ public class User {
         this.password = Bcrypt.hashPassword(password);
     }
 
-    // Helper method to sync both sides of the relationship
-    public void addSentNotification(Notification notification) {
-        sentNotifications.add(notification);
-        notification.setSender(this);  // Owning side update
+    public void addNotification(Notification notification) {
+        if (!receivedNotifications.contains(notification)) {
+            receivedNotifications.add(notification);
+        }
     }
 }

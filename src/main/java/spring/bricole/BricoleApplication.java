@@ -18,6 +18,7 @@ public class BricoleApplication {
         SpringApplication.run(BricoleApplication.class, args);
     }
 
+
     @Bean
     CommandLineRunner initDatabase(
             AdminRepository adminRepository,
@@ -90,5 +91,6 @@ public class BricoleApplication {
 
             System.out.println("Database populated with dummy data!");
         };
+
     }
 }

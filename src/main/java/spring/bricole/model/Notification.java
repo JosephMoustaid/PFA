@@ -20,10 +20,6 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String message;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", referencedColumnName = "id")
-    private User sender;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recieverId", referencedColumnName = "id")
@@ -33,9 +29,8 @@ public class Notification {
     private LocalDateTime createdAt;
 
     // == Constructors ==
-    public Notification(String message, User sender, User receiver, LocalDateTime createdAt) {
+    public Notification(String message, User receiver, LocalDateTime createdAt) {
         this.message = message;
-        this.sender = sender;
         this.receiver = receiver;
         this.createdAt = createdAt;
     }
