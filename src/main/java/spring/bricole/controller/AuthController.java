@@ -2,8 +2,15 @@ package spring.bricole.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import spring.bricole.common.Gender;
 import spring.bricole.dto.AuthResponse;
+import spring.bricole.dto.EmployeeRegisterRequest;
+import spring.bricole.dto.EmployerRegisterRequest;
+import spring.bricole.model.Employee;
+import spring.bricole.model.Employer;
 import spring.bricole.service.AuthService;
+import spring.bricole.service.EmployeeService;
+import spring.bricole.service.EmployerService;
 import spring.bricole.util.JwtUtil;
 import spring.bricole.common.Role;
 
@@ -14,9 +21,13 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmployeeService employeeService;
+    private final EmployerService employerService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, EmployeeService employeeService, EmployerService employerService) {
         this.authService = authService;
+        this.employeeService = employeeService;
+        this.employerService = employerService;
     }
 
     @PostMapping("/employer/login")
@@ -88,6 +99,73 @@ public class AuthController {
                         validation.userId(),
                         "", // Can be fetched from DB if needed
                         validation.role().name()
+                )
+        );
+    }
+
+    @PostMapping("/employee/register")
+    public ResponseEntity<AuthResponse> employeeRegister(
+            @RequestBody EmployeeRegisterRequest request) {
+
+        // Create and populate employee entity
+        Employee employee = new Employee();
+        employee.setFirstname(request.firstname());
+        employee.setLastname(request.lastname());
+        employee.setEmail(request.email());
+        employee.setPassword(request.password()); // Let entity handle hashing
+        employee.setAddress(request.address());
+        employee.setGender(request.gender());
+        employee.setPhoneNumberPrefix(request.phoneNumberPrefix());
+        employee.setPhoneNumber(request.phoneNumber());
+        employee.setProfilePicture(request.profilePicture());
+
+        // Add collections
+        request.skills().forEach(employee::addSkill);
+        request.jobPreferences().forEach(employee::addJobPreference);
+        request.availability().forEach(employee::updateAvailability);
+
+        // Save employee
+        Employee savedEmployee = employeeService.registerEmployee(employee);
+
+        // Generate tokens
+        Map<String, String> tokens = JwtUtil.generateTokens(savedEmployee.getId(), Role.EMPLOYEE);
+
+        // Return response
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        tokens.get("access_token"),
+                        tokens.get("refresh_token"),
+                        savedEmployee.getId(),
+                        savedEmployee.getFirstname() + " " + savedEmployee.getLastname(),
+                        Role.EMPLOYEE.name()
+                )
+        );
+    }
+
+    @PostMapping("/employer/register")
+    public ResponseEntity<AuthResponse> employerRegister(@RequestParam EmployerRegisterRequest request){
+        // save employer to database using the service
+        Employer emplyer = new Employer();
+        emplyer.setFirstname(request.firstname());
+        emplyer.setLastname(request.lastname());
+        emplyer.setEmail(request.email());
+        emplyer.setPassword(request.password());
+        emplyer.setGender(request.gender());
+        emplyer.setPhoneNumberPrefix(request.phoneNumberPrefix());
+        emplyer.setPhoneNumber(request.phoneNumber());
+        emplyer.setAddress(request.address());
+        emplyer.setProfilePicture(request.profilePicture());
+
+        // create tokens
+        Map<String, String> tokens = JwtUtil.generateTokens(emplyer.getId(), Role.EMPLOYER);
+        // return response
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        tokens.get("access_token"),
+                        tokens.get("refresh_token"),
+                        emplyer.getId(),
+                        emplyer.getFirstname() + " " + emplyer.getLastname(),
+                        Role.EMPLOYER.name()
                 )
         );
     }
