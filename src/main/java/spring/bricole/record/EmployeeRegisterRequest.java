@@ -14,3 +14,4 @@ public record EmployeeRegisterRequest(
         String password
 ) {
 }
+

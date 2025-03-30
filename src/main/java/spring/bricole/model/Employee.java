@@ -1,5 +1,6 @@
 package spring.bricole.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,7 +41,12 @@ public class Employee extends User implements IReviewable {
 
 
     // == Reviews ==
+    /*
     @OneToMany(mappedBy = "reviewedEmployee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Review> reviews = new HashSet<>();
+    */
+    @OneToMany(mappedBy = "reviewedEmployee")
+    @JsonIgnore // Break the cycle on Employee side
     private Set<Review> reviews = new HashSet<>();
 
     public Employee(String firstname, String lastname, String email, String password,

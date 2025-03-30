@@ -18,7 +18,7 @@ public class BricoleApplication {
         SpringApplication.run(BricoleApplication.class, args);
     }
 
-
+    /*
     @Bean
     CommandLineRunner initDatabase(
             AdminRepository adminRepository,
@@ -93,4 +93,5 @@ public class BricoleApplication {
         };
 
     }
+    */
 }
