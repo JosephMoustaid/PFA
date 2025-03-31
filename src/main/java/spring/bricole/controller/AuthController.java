@@ -74,7 +74,7 @@ public class AuthController {
             @RequestParam String password) {
 
         var admin = authService.authenticateAdmin(email, password);
-        Map<String, String> tokens = JwtUtil.generateTokens(admin.getId(), Role.ADMIN);
+        Map<String, String> tokens = JwtUtil.generateTokens(admin.getId(), Role.ADMIN); // ✅ Correct line
 
         return ResponseEntity.ok(
                 new AuthResponse(
@@ -143,7 +143,7 @@ public class AuthController {
     }
 
     @PostMapping("/employer/register")
-    public ResponseEntity<AuthResponse> employerRegister(@RequestParam EmployerRegisterRequest request){
+    public ResponseEntity<AuthResponse> employerRegister(@RequestBody EmployerRegisterRequest request){
         // save employer to database using the service
         Employer emplyer = new Employer();
         emplyer.setFirstname(request.firstname());

@@ -25,4 +25,6 @@ public record EmployerRegisterRequest(
         jobOffers.add(job);
         job.setEmployer(this);
     }
+
+
 */
