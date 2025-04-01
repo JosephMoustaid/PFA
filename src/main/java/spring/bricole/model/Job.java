@@ -1,5 +1,6 @@
 package spring.bricole.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -42,6 +43,7 @@ public class Job {
     // In Job.java
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employer_id")
+    @JsonBackReference // Prevents infinite recursion
     private Employer employer;
 
     @JdbcTypeCode(SqlTypes.JSON)

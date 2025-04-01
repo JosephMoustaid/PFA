@@ -1,5 +1,6 @@
 package spring.bricole.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class Employer extends User{
 
     // In Employer.java
     @OneToMany(mappedBy = "employer", fetch = FetchType.LAZY)
+    @JsonManagedReference // Allows serialization
     private List<Job> jobOffers = new ArrayList<>();
 
     // Add helper method for bidirectional sync
