@@ -20,11 +20,13 @@ public class Conversation {
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user1_id", referencedColumnName = "id")
+    @JoinColumn(name = "user1_id")
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private User user1;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user2_id", referencedColumnName = "id")
+    @JoinColumn(name = "user2_id")
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private User user2;
 
     @Column(name="last_message")

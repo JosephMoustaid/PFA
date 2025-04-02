@@ -21,4 +21,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     @Query("SELECT e FROM Employee e WHERE e.address LIKE %:address%")
     List<Employee> findByAddressContaining(@Param("address") String address);
+
+    Boolean existsById(int id);
 }

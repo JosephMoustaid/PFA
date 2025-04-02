@@ -40,5 +40,13 @@ public class EmployeeService {
         return employeeRepository.findByEmail(email);
     }
 
+    public boolean deleteEmployeeById(Integer id) {
+        if (employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }

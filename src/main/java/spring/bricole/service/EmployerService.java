@@ -39,7 +39,18 @@ public class EmployerService {
     }
 
     // Delete employer by ID
-    public void deleteEmployerById(Integer id) {
+    public boolean deleteEmployerById(Integer id) {
         employerRepository.deleteById(id);
+        return false;
     }
+
+    // delete and employer
+    public Boolean deleteEmployerById(int id) {
+        if(employerRepository.existsById(id)){
+            employerRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
 }

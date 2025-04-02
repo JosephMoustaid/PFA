@@ -16,13 +16,16 @@ public class AdminController {
     private final EmployeeService employeeService;
     private final EmployerService employerService;
     private final JobService jobService;
+    private final UserService userService;
 
     public AdminController(AdminService adminService, EmployeeService employeeService,
-                           EmployerService employerService, JobService jobService){
+                           EmployerService employerService, JobService jobService,
+                           UserService userService) {
         this.adminService = adminService;
         this.employeeService = employeeService;
         this.employerService = employerService;
         this.jobService = jobService;
+        this.userService = userService;
     }
 
     // Add this method to verify admin tokens
@@ -39,6 +42,7 @@ public class AdminController {
         }
     }
 
+    // == Fetchces ==
     @GetMapping("/employees")
     public ResponseEntity<List<Employee>> getAllEmployees(
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -88,5 +92,45 @@ public class AdminController {
         verifyAdminToken(authorizationHeader);
         Job job = jobService.getJobById(id);
         return ResponseEntity.ok(job);
+    }
+
+    // == Deletes ==
+    @DeleteMapping("/employee/{id}")
+    public ResponseEntity<String> deleteEmployeeById(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Integer id) {
+        verifyAdminToken(authorizationHeader);
+        boolean deleted = employeeService.deleteEmployeeById(id);
+        if (deleted) {
+            return ResponseEntity.ok("Employee deleted successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Employee not found");
+        }
+    }
+
+    @DeleteMapping("/employer/{id}")
+    public ResponseEntity<String> deleteEmployerById(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Integer id) {
+        verifyAdminToken(authorizationHeader);
+        boolean deleted = employerService.deleteEmployerById(id);
+        if (deleted) {
+            return ResponseEntity.ok("Employer deleted successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Employer not found");
+        }
+    }
+
+    @DeleteMapping("/job/{id}")
+    public ResponseEntity<String> deleteJobById(
+            @RequestParam("Authorization") String authorizationHeader,
+            @PathVariable Integer id) {
+        verifyAdminToken(authorizationHeader);
+        boolean deleted = jobService.deleteJobById(id);
+        if(deleted) {
+            return ResponseEntity.ok("Job deleted successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Job not found");
+        }
     }
 }
