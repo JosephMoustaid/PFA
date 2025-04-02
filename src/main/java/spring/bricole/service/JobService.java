@@ -1,10 +1,13 @@
 package spring.bricole.service;
 
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import spring.bricole.model.Job;
 import spring.bricole.repository.JobRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class JobService {
@@ -62,5 +65,14 @@ public class JobService {
             return true;
         }
         return false;
+    }
+
+
+    public List<Object[]> getApplicationsByJobId(int jobId) {
+        return jobRepository.findApplicationsByJobId(jobId);
+    }
+
+    public List<Object[]> getApplicationsByEmployeeId(int employeeId) {
+        return jobRepository.findApplicationsByEmployeeId(employeeId);
     }
 }

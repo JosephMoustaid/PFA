@@ -7,9 +7,10 @@ import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-public interface JobRepository extends JpaRepository<Job, Integer> {
+public interface JobRepository extends CustomJobRepository , JpaRepository<Job, Integer>  {
     // Data retrieval methods:
 
     // find job by id
@@ -54,5 +55,16 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
 
     // find highest paying jobs
     List<Job> findTop50ByOrderBySalaryDesc();
+/*
+    @Query("SELECT new map(e.id as employeeId, e.name as employeeName, j.applicants[e.id] as applicationState) " +
+            "FROM Job j JOIN Employee e ON KEY(j.applicants) = e.id " +
+            "WHERE j.id = :jobId")
+    List<Map<String, Object>> findApplicationsByJobId(@Param("jobId") int jobId);
 
+    @Query("SELECT new map(j.id as jobId, j.title as jobTitle, j.applicants[:employeeId] as applicationState) " +
+            "FROM Job j " +
+            "WHERE KEY(j.applicants) = :employeeId")
+    List<Map<String, Object>> findApplicationsByEmployeeId(@Param("employeeId") int employeeId);
+
+*/
 }
