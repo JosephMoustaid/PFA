@@ -3,9 +3,11 @@ package spring.bricole.service;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import spring.bricole.common.ApplicationState;
 import spring.bricole.model.Job;
 import spring.bricole.repository.JobRepository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,11 +70,23 @@ public class JobService {
     }
 
 
-    public List<Object[]> getApplicationsByJobId(int jobId) {
-        return jobRepository.findApplicationsByJobId(jobId);
+    public Map<Integer, ApplicationState> getApplicationsByJobId(int jobId) {
+        Job jobFound = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        return jobFound.getApplicants();
     }
 
-    public List<Object[]> getApplicationsByEmployeeId(int employeeId) {
-        return jobRepository.findApplicationsByEmployeeId(employeeId);
+    public Map<Job, ApplicationState> getApplicationsByEmployeeId(int employeeId) {
+        List<Job> jobs = jobRepository.findAll();
+
+        Map<Job, ApplicationState> employeeApplications = new HashMap<>();
+
+        for (Job job : jobs) {
+            for (Map.Entry<Integer, ApplicationState> entry : job.getApplicants().entrySet()) {
+                if (entry.getKey() == employeeId) {
+                    employeeApplications.put(job, entry.getValue());
+                }
+            }
+        }
+        return employeeApplications;
     }
 }

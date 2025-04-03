@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.Role;
+import spring.bricole.dto.JobApplicantDTO;
+import spring.bricole.dto.JobApplicationDTO;
 import spring.bricole.model.*;
 import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
@@ -108,55 +110,32 @@ public class AdminController {
 
      */
     @GetMapping("/applications/job/{id}")
-    public ResponseEntity<List<Map<String, Object>>> getApplicationsByJobId(
+    public ResponseEntity<List<JobApplicantDTO>> getApplicationsByJobId(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Integer id) {
         verifyAdminToken(authorizationHeader);
-        List<Object[]> results = jobService.getApplicationsByJobId(id);
+        Map<Integer, ApplicationState> applications = jobService.getApplicationsByJobId(id);
 
-        List<Map<String, Object>> applications = results.stream()
-                .map(result -> {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    // Assuming result[0] is Employee entity and result[1] is application state
-                    Employee employee = (Employee) result[0];
-                    ApplicationState state = (ApplicationState) result[1];
-
-                    map.put("employeeId", employee.getId());
-                    map.put("employeeName", employee.getFirstname() + " " + employee.getLastname());
-                    // Add other employee fields as needed
-                    map.put("applicationState", state);
-
-                    return map;
-                })
+        // Convert Map<Integer, ApplicationState> to List<JobApplicationDTO>
+        List<JobApplicantDTO> applicantDTOs = applications.entrySet().stream()
+                .map(entry -> new JobApplicantDTO(employeeService.getEmployeeById(entry.getKey()), entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(applications);
+        return ResponseEntity.ok(applicantDTOs);
     }
 
     @GetMapping("/applications/employee/{id}")
-    public ResponseEntity<List<Map<String, Object>>> getApplicationsByEmployeeId(
+    public ResponseEntity<List<JobApplicationDTO>> getApplicationsByEmployeeId(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Integer id) {
         verifyAdminToken(authorizationHeader);
-        List<Object[]> results = jobService.getApplicationsByEmployeeId(id);
+        Map<Job, ApplicationState> applications = jobService.getApplicationsByEmployeeId(id);
 
-        List<Map<String, Object>> applications = results.stream()
-                .map(result -> {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    // Assuming result[0] is Job entity and result[1] is application state
-                    Job job = (Job) result[0];
-                    ApplicationState state = (ApplicationState) result[1];
-
-                    map.put("jobId", job.getId());
-                    map.put("jobTitle", job.getTitle());
-                    // Add other job fields as needed
-                    map.put("applicationState", state);
-
-                    return map;
-                })
+        List<JobApplicationDTO> applicationDTOs = applications.entrySet().stream()
+                .map(entry -> new JobApplicationDTO(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(applications);
+        return ResponseEntity.ok(applicationDTOs);
     }
 
     // == Deletes ==

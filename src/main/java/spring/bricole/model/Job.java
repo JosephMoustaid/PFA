@@ -109,6 +109,9 @@ public class Job {
         missions.remove(mission);
     }
 
+    public Map<Integer, ApplicationState> getApplicants() {
+        return applicants;
+    }
 
 
 }
