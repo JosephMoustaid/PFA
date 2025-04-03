@@ -1,6 +1,12 @@
 package spring.bricole.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import spring.bricole.common.AccountStatus;
 import spring.bricole.model.Employee;
 import spring.bricole.model.User;
 
@@ -16,6 +22,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // get user by email
     Optional<User> findByEmail(String email);
 
+    // update User accout status
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.status = :status WHERE u.id = :id")
+    int updateStatusById(@Param("id") int id, @Param("status") AccountStatus status);
     // get users by first name and last name
     List<User> findByFirstnameAndLastnameOrderByIdDesc(String firstname, String lastname);
 }

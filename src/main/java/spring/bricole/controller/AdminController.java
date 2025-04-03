@@ -2,10 +2,12 @@ package spring.bricole.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import spring.bricole.common.AccountStatus;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.Role;
 import spring.bricole.dto.JobApplicantDTO;
 import spring.bricole.dto.JobApplicationDTO;
+import spring.bricole.dto.JobDTO;
 import spring.bricole.model.*;
 import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
@@ -176,5 +178,62 @@ public class AdminController {
         } else {
             return ResponseEntity.badRequest().body("Job not found");
         }
+    }
+
+    // == Updates ==
+    // Change the status of a user's account
+    // @PostMapping("/user/{id}/updateStatus/{newStatus")
+
+    @PostMapping("/user/{id}/updateStatus/{newStatus}")
+    public ResponseEntity<String> updateUserStatus(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Integer id ,
+            @PathVariable String newStatus ){
+        verifyAdminToken(authorizationHeader);
+
+        if(newStatus == null || newStatus.isEmpty()){
+            return ResponseEntity.badRequest().body("Invalid status");
+        }
+
+        User user = userService.getUserById(id);
+        if(user == null){
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        if( newStatus.equals(user.getStatus().toString()) )
+            return ResponseEntity.badRequest().body("User already has this status");
+
+        if(newStatus.equals("INACTIVE") || newStatus.equals("ACTIVE") || newStatus.equals("SUSPENDED") || newStatus.equals("BANNED")){
+            userService.updateUserAccountStatus(id, AccountStatus.valueOf(newStatus) );
+            return ResponseEntity.ok("User status updated successfully");
+        }
+        else{
+            return ResponseEntity.badRequest().body("Invalid status");
+        }
+    }
+
+    @PostMapping("/job/{id}/updateJob")
+    public ResponseEntity<String> updateJob(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Integer id,
+            @RequestBody JobDTO jobDetails) {
+        verifyAdminToken(authorizationHeader);
+        Job job = jobService.getJobById(id);
+        if (job == null) {
+            return ResponseEntity.badRequest().body("Job not found");
+        }
+
+        // Convert JobDTO to Job entity
+        job.setTitle(jobDetails.getTitle());
+        job.setDescription(jobDetails.getDescription());
+        job.setCategory(jobDetails.getCategory());
+        job.setStatus(jobDetails.getStatus());
+        job.setLocation(jobDetails.getLocation());
+        job.setSalary(jobDetails.getSalary());
+        job.setMedia(jobDetails.getMedia());
+        job.setMissions(jobDetails.getMissions());
+        job.setCreatedAt(jobDetails.getCreatedAt());
+
+        jobService.updateJob(id, job);
+        return ResponseEntity.ok("Job updated successfully");
     }
 }
