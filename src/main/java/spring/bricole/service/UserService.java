@@ -1,11 +1,13 @@
 package spring.bricole.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.common.AccountStatus;
 import spring.bricole.dto.UserResponseDTO;
 import spring.bricole.dto.UserUpdateDTO;
 import spring.bricole.model.User;
+import spring.bricole.repository.ConversationRepository;
 import spring.bricole.repository.UserRepository;
 
 import java.io.IOException;
@@ -21,13 +23,16 @@ import java.util.Map;
 public class UserService {
     private static final String PROFILE_IMAGE_DIR = "src/main/resources/static/images/profile/";
 
-
-    private final ConversationService conversationService;
     private final UserRepository userRepository;
+    private ConversationService conversationService;
 
-    public UserService(ConversationService conversationService, UserRepository userRepository) {
-        this.conversationService = conversationService;
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setConversationService(ConversationService conversationService) {
+        this.conversationService = conversationService;
     }
 
     private UserResponseDTO mapToUserResponseDTO(User user) {
