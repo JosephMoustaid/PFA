@@ -6,6 +6,7 @@ import spring.bricole.model.Message;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
@@ -18,4 +19,5 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "VALUES (:conversationId, :isRead, :isSent, :sender, :sendAt, :receiver, :content)")
     void sendMessage(int conversationId, boolean isRead, boolean isSent, int sender, Timestamp timestamp, int receiver, String content);
 */
+
 }

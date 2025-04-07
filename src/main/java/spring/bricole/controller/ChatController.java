@@ -3,6 +3,7 @@ package spring.bricole.controller;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import spring.bricole.dto.ChatMessageDTO;
 import spring.bricole.model.Conversation;
 import spring.bricole.model.User;
@@ -34,6 +35,7 @@ public class ChatController {
         this.conversationService = conversationService;
     }
 
+    @Transactional
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessageDTO chatMessage) {
         // Save the message to database
@@ -52,12 +54,16 @@ public class ChatController {
         message.setRead(false);
         message.setSent(true);
 
+
         // add the message to the conversation
         conversation.addMessage(message);
 
         // Update conversation last message info
         conversation.setLastMessage(chatMessage.getContent());
         conversation.setLastMessageAt(LocalDateTime.now());
+
+        // Save the message first
+        messageService.saveMessage(message);
 
         // Save Conversation
         conversationService.updateConversation(conversation);

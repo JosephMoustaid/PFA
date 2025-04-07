@@ -11,17 +11,16 @@ import java.time.LocalDateTime;
 
 @Service
 public class MessageService {
-/*
+
     MessageRepository messageRepository;
-    UserService userService;
-    ConversationService conversationService;
-    public void MessageRepository(MessageRepository messageRepository,
-                                  UserService userService,
-                                  ConversationService conversationService) {
+
+    public MessageService(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        this.userService = userService;
-        this.conversationService = conversationService;
     }
-*/
+
+    // savve the message
+    public void saveMessage(Message message){
+        messageRepository.save(message);
+    }
 
 }
