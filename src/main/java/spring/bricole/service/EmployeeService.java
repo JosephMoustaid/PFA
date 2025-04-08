@@ -49,4 +49,14 @@ public class EmployeeService {
         }
     }
 
+    public List<Employee> findByFullName(String fullName) {
+        return employeeRepository.findByFullName(fullName);
+    }
+
+    public List<Employee> findBySkill(String skill) {
+        return employeeRepository.findBySkill(skill);
+    }
+    public List<Employee> findByAddress(String address) {
+        return employeeRepository.findByAddress(address);
+    }
 }

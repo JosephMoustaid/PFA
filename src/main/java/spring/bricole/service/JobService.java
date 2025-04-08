@@ -10,6 +10,7 @@ import spring.bricole.repository.JobRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -22,7 +23,7 @@ public class JobService {
 
     // Get all jobs
     public List<Job> getAllJobs() {
-        return jobRepository.findAll();
+        return jobRepository.findAllByOrderByCreatedAtDesc();
     }
 
     // Get job by ID
@@ -88,5 +89,34 @@ public class JobService {
             }
         }
         return employeeApplications;
+    }
+
+    public List<Job> findByTitle(String title) {
+        return jobRepository.findByTitleOrderByCreatedAtDesc(title);
+    }
+
+    public List<Job> findByDescription(String description) {
+        return jobRepository.findByDescriptionContaining(description);
+    }
+    public List<Job> findByCategory(String category) {
+        return jobRepository.findByCategoryOrderByCategoryDesc(category);
+    }
+    public List<Job> findByLocation(String location) {
+        return jobRepository.findByLocationContainingOrderByCreatedAtDesc(location);
+    }
+    public List<Job> findByJobStatus(String status) {
+        return jobRepository.findAllByStatus(status);
+    }
+    public List<Job> findHighestPayingJobs() {
+        return jobRepository.findTop50ByOrderBySalaryDesc();
+    }
+
+    // find most trending jobs
+    public List<Job> findTrendingJobs() {
+        return jobRepository
+                .findAllByOrderByCreatedAtDesc()
+                .stream()
+                .sorted((job1, job2) -> Integer.compare(job2.getApplicants().size(), job1.getApplicants().size()))
+                .collect(Collectors.toList());
     }
 }
