@@ -1,20 +1,26 @@
 package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
+import spring.bricole.common.ApplicationState;
 import spring.bricole.model.Employee;
+import spring.bricole.model.Job;
 import spring.bricole.repository.EmployeeRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final JobService jobService;
 
     // Constructor injection
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository,
+                           JobService jobService) {
         this.employeeRepository = employeeRepository;
+        this.jobService = jobService;
     }
 
     // Get all employees
@@ -49,6 +55,10 @@ public class EmployeeService {
         }
     }
 
+    // save updates
+    public Employee saveEmployee(Employee employeeDetails) {
+        return employeeRepository.save(employeeDetails);
+    }
     public List<Employee> findByFullName(String fullName) {
         return employeeRepository.findByFullName(fullName);
     }
@@ -58,5 +68,14 @@ public class EmployeeService {
     }
     public List<Employee> findByAddress(String address) {
         return employeeRepository.findByAddress(address);
+    }
+
+    // get applied jobs
+    public Map<Job, ApplicationState>  getAppliedJobs(int employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        Map<Job, ApplicationState> appliedJobs = jobService.getApplicationsByEmployeeId(employee.getId());
+
+        return appliedJobs;
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public record EmployeeConsultingResponse(
+public record EmployeeDTO(
         String firstname,
         String lastname,
         int phoneNumberPrefix ,

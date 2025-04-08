@@ -48,6 +48,7 @@ public class JobService {
         job.setLocation(jobDetails.getLocation());
         job.setSalary(jobDetails.getSalary());
         job.setCreatedAt(jobDetails.getCreatedAt());
+        job.setApplicants(jobDetails.getApplicants());
         return jobRepository.save(job);
     }
 
@@ -117,6 +118,14 @@ public class JobService {
                 .findAllByOrderByCreatedAtDesc()
                 .stream()
                 .sorted((job1, job2) -> Integer.compare(job2.getApplicants().size(), job1.getApplicants().size()))
+                .collect(Collectors.toList());
+    }
+
+    // find jobs by employer
+    public List<Job> findByEmployerId(int employerId) {
+        return jobRepository.findAll()
+                .stream()
+                .filter(job -> job.getEmployer().getId() == employerId)
                 .collect(Collectors.toList());
     }
 }

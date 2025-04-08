@@ -2,7 +2,7 @@ package spring.bricole.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import spring.bricole.dto.EmployeeConsultingResponse;
+import spring.bricole.dto.EmployeeDTO;
 import spring.bricole.dto.ReviewResponse;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
@@ -95,12 +95,12 @@ public class MainController {
     // Requires authorization:
 // Get all employees
     @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeConsultingResponse>> getAllEmployees(@RequestHeader("Authorization") String auth) {
+    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(@RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
-        List<EmployeeConsultingResponse> employees = employeeService.getAllEmployees()
+        List<EmployeeDTO> employees = employeeService.getAllEmployees()
                 .stream()
-                .map(employee -> new EmployeeConsultingResponse(
+                .map(employee -> new EmployeeDTO(
                         employee.getFirstname(),
                         employee.getLastname(),
                         employee.getPhoneNumberPrefix(),
@@ -117,12 +117,12 @@ public class MainController {
 
     // Get employee by ID
     @GetMapping("/employees/{id}")
-    public ResponseEntity<EmployeeConsultingResponse> getEmployeeById(@PathVariable Integer id,
-                                                                      @RequestHeader("Authorization") String auth) {
+    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Integer id,
+                                                       @RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
         Employee employee = employeeService.getEmployeeById(id);
-        EmployeeConsultingResponse response = new EmployeeConsultingResponse(
+        EmployeeDTO response = new EmployeeDTO(
                 employee.getFirstname(),
                 employee.getLastname(),
                 employee.getPhoneNumberPrefix(),
@@ -138,13 +138,13 @@ public class MainController {
 
     // Get employee by email
     @GetMapping("/employees/email/{email}")
-    public ResponseEntity<EmployeeConsultingResponse> getEmployeeByEmail(@PathVariable String email,
-                                                                         @RequestHeader("Authorization") String auth) {
+    public ResponseEntity<EmployeeDTO> getEmployeeByEmail(@PathVariable String email,
+                                                          @RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
         Employee employee = employeeService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
-        EmployeeConsultingResponse response = new EmployeeConsultingResponse(
+        EmployeeDTO response = new EmployeeDTO(
                 employee.getFirstname(),
                 employee.getLastname(),
                 employee.getPhoneNumberPrefix(),
@@ -160,13 +160,13 @@ public class MainController {
 
     // Search employees by full name
     @GetMapping("/employees/search/fullname/{fullname}")
-    public ResponseEntity<List<EmployeeConsultingResponse>> getEmployeesByFullName(@PathVariable String fullname,
-                                                                                   @RequestHeader("Authorization") String auth) {
+    public ResponseEntity<List<EmployeeDTO>> getEmployeesByFullName(@PathVariable String fullname,
+                                                                    @RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
-        List<EmployeeConsultingResponse> employees = employeeService.findByFullName(fullname)
+        List<EmployeeDTO> employees = employeeService.findByFullName(fullname)
                 .stream()
-                .map(employee -> new EmployeeConsultingResponse(
+                .map(employee -> new EmployeeDTO(
                         employee.getFirstname(),
                         employee.getLastname(),
                         employee.getPhoneNumberPrefix(),
@@ -183,13 +183,13 @@ public class MainController {
 
     // Search employees by skill
     @GetMapping("/employees/search/skill/{skill}")
-    public ResponseEntity<List<EmployeeConsultingResponse>> getEmployeesBySkill(@PathVariable String skill,
-                                                                                @RequestHeader("Authorization") String auth) {
+    public ResponseEntity<List<EmployeeDTO>> getEmployeesBySkill(@PathVariable String skill,
+                                                                 @RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
-        List<EmployeeConsultingResponse> employees = employeeService.findBySkill(skill)
+        List<EmployeeDTO> employees = employeeService.findBySkill(skill)
                 .stream()
-                .map(employee -> new EmployeeConsultingResponse(
+                .map(employee -> new EmployeeDTO(
                         employee.getFirstname(),
                         employee.getLastname(),
                         employee.getPhoneNumberPrefix(),
@@ -206,13 +206,13 @@ public class MainController {
 
     // Search employees by location
     @GetMapping("/employees/search/location/{location}")
-    public ResponseEntity<List<EmployeeConsultingResponse>> getEmployeesByLocation(@PathVariable String location,
-                                                                                   @RequestHeader("Authorization") String auth) {
+    public ResponseEntity<List<EmployeeDTO>> getEmployeesByLocation(@PathVariable String location,
+                                                                    @RequestHeader("Authorization") String auth) {
         int userId = extractUserIdFromToken(auth);
 
-        List<EmployeeConsultingResponse> employees = employeeService.findByAddress(location)
+        List<EmployeeDTO> employees = employeeService.findByAddress(location)
                 .stream()
-                .map(employee -> new EmployeeConsultingResponse(
+                .map(employee -> new EmployeeDTO(
                         employee.getFirstname(),
                         employee.getLastname(),
                         employee.getPhoneNumberPrefix(),

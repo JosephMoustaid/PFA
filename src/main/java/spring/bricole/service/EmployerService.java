@@ -2,6 +2,7 @@ package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
 import spring.bricole.model.Employer;
+import spring.bricole.model.Job;
 import spring.bricole.repository.EmployerRepository;
 
 import java.util.List;
@@ -52,5 +53,6 @@ public class EmployerService {
         }
         return false;
     }
+
 
 }

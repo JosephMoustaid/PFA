@@ -73,4 +73,7 @@ public class User {
             receivedNotifications.add(notification);
         }
     }
+    public void removeNotification(Notification notification) {
+        receivedNotifications.remove(notification);
+    }
 }

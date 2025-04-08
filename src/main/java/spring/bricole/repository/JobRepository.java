@@ -56,7 +56,6 @@ public interface JobRepository extends CustomJobRepository , JpaRepository<Job, 
     // find highest paying jobs
     List<Job> findTop50ByOrderBySalaryDesc();
 
-
     /*
     @Query("SELECT new map(e.id as employeeId, e.name as employeeName, j.applicants[e.id] as applicationState) " +
             "FROM Job j JOIN Employee e ON KEY(j.applicants) = e.id " +
@@ -67,6 +66,5 @@ public interface JobRepository extends CustomJobRepository , JpaRepository<Job, 
             "FROM Job j " +
             "WHERE KEY(j.applicants) = :employeeId")
     List<Map<String, Object>> findApplicationsByEmployeeId(@Param("employeeId") int employeeId);
-
 */
 }
