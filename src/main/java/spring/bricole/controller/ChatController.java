@@ -5,6 +5,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestHeader;
 import spring.bricole.dto.ChatMessageDTO;
 import spring.bricole.model.Conversation;
@@ -14,6 +15,7 @@ import spring.bricole.service.ConversationService;
 import spring.bricole.service.MessageService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import spring.bricole.dto.ChatNotificationDTO;
 import spring.bricole.dto.ChatMessageResponseDTO;
@@ -22,6 +24,7 @@ import spring.bricole.dto.ChatTypingDTO;
 import spring.bricole.model.Message;
 import spring.bricole.util.JwtUtil;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @Controller
 public class ChatController {
 
@@ -145,6 +148,43 @@ public class ChatController {
                 true // typing status
         );
         messagingTemplate.convertAndSend("/topic/typing/" + chatMessage.getRoom(), typingNotification);
+    }
+
+
+
+    @MessageMapping("/chat.loadMessages")
+    @SendTo("/topic/room/{roomId}")
+    public List<ChatMessageResponseDTO> loadMessages(@DestinationVariable("roomId") int roomId,
+                                                     @RequestHeader("Authorization") String auth) {
+        // Extract user ID from the token
+        int userId = extractUserIdFromToken(auth);
+
+        // Retrieve the conversation by ID
+        Conversation conversation = conversationRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+        // Check if the user is part of the conversation
+        if (conversation.getUser1().getId() != userId && conversation.getUser2().getId() != userId) {
+            throw new RuntimeException("User not authorized to access this conversation");
+        }
+
+        // Retrieve messages from the conversation
+        List<Message> messages = conversation.getMessages();
+
+        // Convert messages to response DTOs
+        List<ChatMessageResponseDTO> response = messages.stream()
+                .map(message -> new ChatMessageResponseDTO(
+                        message.getId(),
+                        conversation.getId(),
+                        message.getSender().getId(),
+                        message.getSender().getFirstname(),
+                        message.getSender().getLastname(),
+                        message.getContent(),
+                        message.getSendAt()
+                ))
+                .toList();
+
+        return response;
     }
 }
 

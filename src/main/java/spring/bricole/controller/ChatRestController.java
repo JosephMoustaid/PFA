@@ -10,6 +10,7 @@ import spring.bricole.util.JwtUtil;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/chat")
 public class ChatRestController {
@@ -62,7 +63,6 @@ public class ChatRestController {
                 conversation.getUser2Id()
         ));
     }
-
     @GetMapping("/conversation/{id}")
     public ResponseEntity<Conversation> getConversationById(
             @RequestHeader("Authorization") String auth,
@@ -74,11 +74,6 @@ public class ChatRestController {
         }
         return ResponseEntity.ok(conversation);
     }
-
-
-
-
-
     // --------------------------------------------------------------------
     // --------------------------------------------------------------------
     // --------------------------------------------------------------------
