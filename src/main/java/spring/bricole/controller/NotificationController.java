@@ -36,6 +36,7 @@ public class NotificationController {
         return validation.userId(); // Returns the authenticated user's ID
     }
 
+    // tested and validated
     // consult my notifications
     @GetMapping("/notifications")
     public ResponseEntity<?> getNotifications(
@@ -69,6 +70,7 @@ public class NotificationController {
         }
     }
 
+    // tested and validated
     // check a notification
     @GetMapping("/notifications/{notificationId}")
     public ResponseEntity<?> getNotificationById(
@@ -104,6 +106,7 @@ public class NotificationController {
         }
     }
 
+    // tested and validated
     // remove a notification
     @DeleteMapping("/notifications/{notificationId}")
     public ResponseEntity<?> removeNotification(
