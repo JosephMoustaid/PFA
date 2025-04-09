@@ -4,12 +4,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.dto.EmployeeDTO;
+import spring.bricole.dto.JobDTO;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
 import spring.bricole.service.EmployeeService;
 import spring.bricole.service.JobService;
 import spring.bricole.util.JwtUtil;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -33,6 +36,7 @@ public class EmployeeController {
         return validation.userId();
     }
 
+    // tested and validated
     @GetMapping("/details")
     public ResponseEntity<?> getEmployeeDetails(
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -66,7 +70,7 @@ public class EmployeeController {
                     ));
         }
     }
-
+    // tested and validated
     @PutMapping("/update")
     public ResponseEntity<?> updateEmployee(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -100,6 +104,7 @@ public class EmployeeController {
         }
     }
 
+    // tested and validated
     @GetMapping("/applications")
     public ResponseEntity<?> getApplications(
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -107,12 +112,14 @@ public class EmployeeController {
             int userId = extractUserIdFromToken(authorizationHeader);
             Map<Job, ApplicationState> applications = employeeService.getAppliedJobs(userId);
 
-            return ResponseEntity.ok()
-                    .body(Map.of(
-                            "status", "success",
-                            "message", "Employee applications retrieved successfully",
-                            "data", applications
-                    ));
+            List<Map<String, Object>> response = applications.entrySet().stream()
+                    .map(entry -> Map.of(
+                            "job", new JobDTO(entry.getKey()),
+                            "state", entry.getValue()
+                    ))
+                    .toList();
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(Map.of(
@@ -122,6 +129,8 @@ public class EmployeeController {
         }
     }
 
+
+    // tested and validated
     @GetMapping("/application/{applicationId}")
     public ResponseEntity<?> getApplication(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -150,6 +159,7 @@ public class EmployeeController {
         }
     }
 
+    // tested and validated
     @PostMapping("/apply/job/{jobId}")
     public ResponseEntity<?> applyForJob(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -158,6 +168,14 @@ public class EmployeeController {
             int userId = extractUserIdFromToken(authorizationHeader);
             Job job = jobService.getJobById(jobId);
 
+
+            if(job.getApplicants().containsKey(userId)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of(
+                                "status", "error",
+                                "message", "Already applied for this job"
+                        ));
+            }
             job.getApplicants().put(userId, ApplicationState.PENDING);
             jobService.updateJob(jobId, job);
 
