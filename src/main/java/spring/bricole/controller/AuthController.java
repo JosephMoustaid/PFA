@@ -6,11 +6,11 @@ import spring.bricole.common.Gender;
 import spring.bricole.dto.AuthResponse;
 import spring.bricole.dto.EmployeeRegisterRequest;
 import spring.bricole.dto.EmployerRegisterRequest;
+import spring.bricole.dto.ResetPasswordRequestDTO;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Employer;
-import spring.bricole.service.AuthService;
-import spring.bricole.service.EmployeeService;
-import spring.bricole.service.EmployerService;
+import spring.bricole.model.User;
+import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
 import spring.bricole.common.Role;
 
@@ -23,11 +23,13 @@ public class AuthController {
     private final AuthService authService;
     private final EmployeeService employeeService;
     private final EmployerService employerService;
+    private final UserService userService;
 
-    public AuthController(AuthService authService, EmployeeService employeeService, EmployerService employerService) {
+    public AuthController(AuthService authService, EmployeeService employeeService, EmployerService employerService, UserService userService) {
         this.authService = authService;
         this.employeeService = employeeService;
         this.employerService = employerService;
+        this.userService = userService;
     }
 
     @PostMapping("/employer/login")
@@ -168,5 +170,37 @@ public class AuthController {
                         Role.EMPLOYER.name()
                 )
         );
+    }
+
+    // reset passowrd
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        String email = request.email();
+        String oldPassword = request.oldPassword();
+        String newPassword = request.newPassword();
+
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Invalid credentials.");
+        }
+
+        if (!Bcrypt.checkPassword(oldPassword, user.getPassword())) {
+            return ResponseEntity.badRequest().body("Invalid credentials.");
+        }
+
+        if (!isValidPassword(newPassword)) {
+            return ResponseEntity.badRequest().body("New password must be at least 8 characters long and include uppercase letters, numbers, and special characters.");
+        }
+
+        userService.updateUserPassword(user.getId() , newPassword);
+
+        return ResponseEntity.ok("Password updated successfully.");
+    }
+
+    private boolean isValidPassword(String password) {
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+        return password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
     }
 }

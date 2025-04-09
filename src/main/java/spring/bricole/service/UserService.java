@@ -35,6 +35,17 @@ public class UserService {
         this.conversationService = conversationService;
     }
 
+    // get user by email
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // update user password
+    public void updateUserPassword(int id, String newPassword) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(newPassword);
+        userRepository.save(user);
+    }
     private UserResponseDTO mapToUserResponseDTO(User user) {
         return new UserResponseDTO(
                 user.getEmail(),
