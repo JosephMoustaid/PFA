@@ -204,6 +204,9 @@ public class AdminController {
 
         if(newStatus.equals("INACTIVE") || newStatus.equals("ACTIVE") || newStatus.equals("SUSPENDED") || newStatus.equals("BANNED")){
             userService.updateUserAccountStatus(id, AccountStatus.valueOf(newStatus) );
+
+            userService.addNotification(id, "Your account status was changed to " + newStatus + " by the admin");
+
             return ResponseEntity.ok("User status updated successfully");
         }
         else{

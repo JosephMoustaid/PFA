@@ -8,10 +8,7 @@ import spring.bricole.dto.*;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
 import spring.bricole.model.Review;
-import spring.bricole.service.EmployeeService;
-import spring.bricole.service.EmployerService;
-import spring.bricole.service.JobService;
-import spring.bricole.service.ReviewService;
+import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
 
 import java.time.LocalDateTime;
@@ -25,14 +22,17 @@ public class EmployerController {
     private final EmployerService empployerService;
     private final EmployeeService employeeService;
     private final EmployerService employerService;
+    private final UserService userService;
 
     public EmployerController(EmployerService empployerService, JobService jobService,
-                              EmployeeService employeeService, EmployerService employerService) {
+                              EmployeeService employeeService, EmployerService employerService,
+                              UserService userService) {
         this.empployerService = empployerService;
         this.jobService = jobService;
         //
         this.employeeService = employeeService;
         this.employerService = employerService;
+        this.userService = userService;
     }
 
     // Helper method to extract user ID from JWT token
@@ -195,6 +195,9 @@ public class EmployerController {
               return ResponseEntity.badRequest().body("Invalid review format");
        }
         employeeService.saveEmployee(employee);
+
+        userService.addNotification(userId, "You got a new review from " + employee.getFirstname() + " " + employee.getLastname());
+
         return ResponseEntity.ok("Review added successfully");
     }
 

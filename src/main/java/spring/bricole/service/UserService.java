@@ -6,8 +6,10 @@ import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.common.AccountStatus;
 import spring.bricole.dto.UserResponseDTO;
 import spring.bricole.dto.UserUpdateDTO;
+import spring.bricole.model.Notification;
 import spring.bricole.model.User;
 import spring.bricole.repository.ConversationRepository;
+import spring.bricole.repository.NotificationRepository;
 import spring.bricole.repository.UserRepository;
 
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private ConversationService conversationService;
+    private NotificationRepository notificationRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -46,6 +49,17 @@ public class UserService {
         user.setPassword(newPassword);
         userRepository.save(user);
     }
+
+    // add notification
+    public void addNotification(int userId, String message) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Notification notification = new Notification();
+        notification.setReceiver(user);
+        notification.setMessage(message);
+        notification.setCreatedAt(LocalDateTime.now());
+        notificationRepository.save(notification);
+    }
+
     private UserResponseDTO mapToUserResponseDTO(User user) {
         return new UserResponseDTO(
                 user.getEmail(),
@@ -166,5 +180,10 @@ public class UserService {
 
         // 6. Return DTO
         return mapToUserResponseDTO(user);
+    }
+
+    @Autowired
+    public void setNotificationRepository(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
     }
 }
