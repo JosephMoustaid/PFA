@@ -74,8 +74,9 @@ public class EmployerController {
     }
 
 
-    @PostMapping("/job/{id}/applicants")
-    public ResponseEntity<Map<EmployeeDTO, ApplicationState>> getJobApplicants(
+    // tested and validated
+    @GetMapping("/job/{id}/applicants")
+    public ResponseEntity<Map<EmployeeResponseDTO, ApplicationState>> getJobApplicants(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable int id) {
         int userId = extractUserIdFromToken(authorizationHeader);
@@ -84,13 +85,14 @@ public class EmployerController {
 
         Map<Integer, ApplicationState> jobApplicants = job.getApplicants();
 
-        Map<EmployeeDTO, ApplicationState> applicants = new HashMap<>();
+        Map<EmployeeResponseDTO, ApplicationState> applicants = new HashMap<>();
 
         for (Map.Entry<Integer, ApplicationState> entry : jobApplicants.entrySet()) {
             int applicantId = entry.getKey();
             ApplicationState state = entry.getValue();
             Employee employee = employeeService.getEmployeeById(applicantId);
-            EmployeeDTO employeeDTO = new EmployeeDTO(
+            EmployeeResponseDTO employeeDTO = new EmployeeResponseDTO(
+                    applicantId,
                     employee.getFirstname(),
                     employee.getLastname(),
                     employee.getPhoneNumberPrefix(),
@@ -106,37 +108,60 @@ public class EmployerController {
         return ResponseEntity.ok(applicants);
     }
 
-    // Updated method to return both EmployeeDTO and ApplicationState
-    @GetMapping("/job/{id}/applications/{applicationId}")
-    public ResponseEntity<JobApplicationResponseDTO> getJobApplication(
+    // tested and validated
+    @GetMapping("/job/{id}/applications/{employeeId}")
+    public ResponseEntity<JobApplicationEmployeeAndStateResponseDTO> getJobApplication(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable int id,
-            @PathVariable int applicationId) {
+            @PathVariable int employeeId) {
         int userId = extractUserIdFromToken(authorizationHeader);
+
+        // Retrieve the job by ID
         Job job = jobService.getJobById(id);
-        Map<Integer, ApplicationState> jobApplicants = job.getApplicants();
-        for (Map.Entry<Integer, ApplicationState> entry : jobApplicants.entrySet()) {
-            if (entry.getKey() == applicationId) {
-                int applicantId = entry.getKey();
-                ApplicationState state = entry.getValue();
-                Employee employee = employeeService.getEmployeeById(applicantId);
-                EmployeeDTO employeeDTO = new EmployeeDTO(
-                        employee.getFirstname(),
-                        employee.getLastname(),
-                        employee.getPhoneNumberPrefix(),
-                        employee.getPhoneNumber(),
-                        employee.getSkills(),
-                        employee.getProfilePicture(),
-                        employee.getAvailabilityDaysOfWeek(),
-                        employee.getJobPreferences(),
-                        employee.getReviews()
-                );
-                JobApplicationResponseDTO response = new JobApplicationResponseDTO(employeeDTO, state);
-                return ResponseEntity.ok(response);
-            }
+        if (job == null) {
+            System.out.println("Job not found with ID: " + id);
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+
+        // Retrieve the applicants for the job
+        Map<Integer, ApplicationState> jobApplicants = job.getApplicants();
+        if (jobApplicants == null || jobApplicants.isEmpty()) {
+            System.out.println("No applicants found for job ID: " + id);
+            return ResponseEntity.notFound().build();
+        }
+
+        // Find the employee by full name
+        Employee emp = employeeService.getEmployeeById(employeeId);
+
+        ApplicationState applicationState = jobApplicants.get(employeeId);
+
+        if (emp == null ) {
+            System.out.println("Employee not found with id : " + employeeId);
+            return ResponseEntity.notFound().build();
+        }
+
+
+        // Create the EmployeeDTO
+        EmployeeResponseDTO employeeDTO = new EmployeeResponseDTO(
+                emp.getId(),
+                emp.getFirstname(),
+                emp.getLastname(),
+                emp.getPhoneNumberPrefix(),
+                emp.getPhoneNumber(),
+                emp.getSkills(),
+                emp.getProfilePicture(),
+                emp.getAvailabilityDaysOfWeek(),
+                emp.getJobPreferences(),
+                emp.getReviews()
+        );
+
+        // Create the response DTO
+        JobApplicationEmployeeAndStateResponseDTO response = new JobApplicationEmployeeAndStateResponseDTO( employeeDTO , applicationState);
+
+        return ResponseEntity.ok(response);
     }
+
+    // tested and validated
     @GetMapping("/job/offers")
     public ResponseEntity<List<Job>> getJobOffers(
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -147,6 +172,8 @@ public class EmployerController {
 
 
 
+
+    // tested and validated
     @PostMapping("/employee/{id}/review")
     public ResponseEntity<String> addReview(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -169,4 +196,5 @@ public class EmployerController {
         employeeService.saveEmployee(employee);
         return ResponseEntity.ok("Review added successfully");
     }
+
 }
