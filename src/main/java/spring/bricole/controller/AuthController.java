@@ -51,6 +51,29 @@ public class AuthController {
         );
     }
 
+    // common login route for both employee and employer
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+            @RequestParam String email,
+            @RequestParam String password) {
+
+        int id = authService.authentificateUser(email, password);
+        String role = authService.getUserRole(id);
+
+        Map<String, String> tokens = JwtUtil.generateTokens(id, Role.valueOf(role));
+
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        tokens.get("access_token"),
+                        tokens.get("refresh_token"),
+                        id,
+                        authService.getUserFullname(id),
+                        role
+                )
+        );
+    }
+
+
     @PostMapping("/employee/login")
     public ResponseEntity<AuthResponse> employeeLogin(
             @RequestParam String email,
