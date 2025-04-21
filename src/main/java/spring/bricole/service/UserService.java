@@ -77,8 +77,7 @@ public class UserService {
     private static final Map<String, String> MIME_TYPE_TO_EXTENSION = Map.of(
             "image/jpg", "jpg",
             "image/png", "png",
-            "image/webp", "webp"
-    );
+            "image/webp", "webp");
 
     private String getExtensionFromMimeType(MultipartFile file) {
         String mimeType = file.getContentType();
