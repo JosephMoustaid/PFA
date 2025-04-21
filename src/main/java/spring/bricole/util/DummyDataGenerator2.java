@@ -194,7 +194,15 @@ public class DummyDataGenerator2 {
             int rating = 1 + random.nextInt(5); // 1-5 stars
 
 
-            employee.addReview(reviewer , reviewContent, rating); // Assuming there's a method to add reviews to the employee
+
+
+
+            try {
+                employee.addReview(reviewer, reviewContent, rating);
+            } catch (InvalidPropertiesFormatException e) {
+                System.err.println("Failed to add review: " + e.getMessage());
+                // Handle the exception (e.g., log it or skip this review)
+            }
         }
     }
 

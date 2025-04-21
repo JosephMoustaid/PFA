@@ -13,6 +13,8 @@ import spring.bricole.common.Gender;
 import spring.bricole.common.JobCategory;
 import spring.bricole.common.Skill;
 
+import java.time.LocalDateTime;
+
 import java.util.*;
 
 @Getter
@@ -85,13 +87,19 @@ public class Employee extends User implements IReviewable {
 
     @Override
     public Review addReview(User user, String content, int rating) throws InvalidPropertiesFormatException {
+        if (rating > 5 || rating < 1) {
+            throw new InvalidPropertiesFormatException("The rating should be between 1 and 5");
+        }
+
         Review review = new Review();
         review.setReviewerName(user.getFirstname() + " " + user.getLastname());
         review.setContent(content);
-        if (rating > 5 || rating < 1)
-            throw new InvalidPropertiesFormatException("The rating should be between 1 and 5");
         review.setRating(rating);
-        return null;
+        review.setReviewedEmployee(this); // Set the relationship if needed
+
+        review.setCreatedAt(LocalDateTime.now()); // Set the creation date
+        this.reviews.add(review); // Add the review to the collection
+        return review; // Return the created review
     }
 
     @Override
