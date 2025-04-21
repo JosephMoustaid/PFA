@@ -12,6 +12,7 @@ import spring.bricole.blueprints.IReviewable;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobCategory;
 import spring.bricole.common.JobStatus;
+import spring.bricole.util.Address;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -113,5 +114,28 @@ public class Job {
         return applicants;
     }
 
+
+    public Address getAddressAsObject() {
+        double latitude = 0.0;
+        double longitude = 0.0;
+        if( location != null && !location.isEmpty() ) {
+            String[] parts = location.split(",");
+            if (parts.length == 2) {
+                try {
+                    latitude = Double.parseDouble(parts[0].trim());
+                    longitude = Double.parseDouble(parts[1].trim());
+                } catch (NumberFormatException e) {
+                    // Handle parsing error
+                    System.err.println("Error parsing address: " + e.getMessage());
+                }
+            }
+            return new Address(latitude, longitude);
+        }
+        return new Address( );
+    }
+
+    public void setAddressAsObject( Address address) {
+        this.location = address.getLatitude() + "," + address.getLongitude();
+    }
 
 }

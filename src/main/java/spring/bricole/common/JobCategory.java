@@ -8,5 +8,7 @@ public enum JobCategory {
     GARDENING,
     CLEANING,
     MOVING,
+    MAINTENANCE,
+    MASONRY,
     OTHER
 }

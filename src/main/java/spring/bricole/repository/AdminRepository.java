@@ -11,5 +11,4 @@ public interface AdminRepository extends JpaRepository<Admin, Integer> {
 
     // Find admin by email, because the password is hashed , the service will handle the password verification
     Optional<Admin> findByEmail(String email);
-
 }

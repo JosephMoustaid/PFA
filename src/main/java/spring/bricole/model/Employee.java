@@ -101,7 +101,7 @@ public class Employee extends User implements IReviewable {
 
     @Override
     public double getAverageRating() {
-        double avg = 0.0;
+        double avg = 1.0;
         if(reviews.isEmpty() )
             return avg;
         for(Review rev : reviews){

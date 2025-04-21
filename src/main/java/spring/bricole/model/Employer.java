@@ -20,8 +20,6 @@ import java.util.List;
 public class Employer extends User{
 
 
-
-
     // In Employer.java
     @OneToMany(mappedBy = "employer", fetch = FetchType.LAZY)
     @JsonManagedReference // Allows serialization

@@ -9,6 +9,7 @@ import lombok.Setter;
 import spring.bricole.common.AccountStatus;
 import spring.bricole.common.Gender;
 import spring.bricole.service.Bcrypt;
+import spring.bricole.util.Address;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,5 +76,28 @@ public class User {
     }
     public void removeNotification(Notification notification) {
         receivedNotifications.remove(notification);
+    }
+
+    public Address getAddressAsObject() {
+        double latitude = 0.0;
+        double longitude = 0.0;
+        if( address != null && !address.isEmpty() ) {
+            String[] parts = address.split(",");
+            if (parts.length == 2) {
+                try {
+                    latitude = Double.parseDouble(parts[0].trim());
+                    longitude = Double.parseDouble(parts[1].trim());
+                } catch (NumberFormatException e) {
+                    // Handle parsing error
+                    System.err.println("Error parsing address: " + e.getMessage());
+                }
+            }
+            return new Address(latitude, longitude);
+        }
+        return new Address( );
+    }
+
+    public void setAddressObject(Address address) {
+        this.address = address.getLatitude() + "," + address.getLongitude();
     }
 }

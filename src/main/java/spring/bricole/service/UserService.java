@@ -75,7 +75,7 @@ public class UserService {
     }
 
     private static final Map<String, String> MIME_TYPE_TO_EXTENSION = Map.of(
-            "image/jpeg", "jpg",
+            "image/jpg", "jpg",
             "image/png", "png",
             "image/webp", "webp"
     );
