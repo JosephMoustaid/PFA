@@ -7,11 +7,13 @@ import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobStatus;
 import spring.bricole.dto.*;
 import spring.bricole.model.Employee;
+import spring.bricole.model.Employer;
 import spring.bricole.model.Job;
 import spring.bricole.model.Review;
 import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
-
+import spring.bricole.util.ObjectMapper;
+import spring.bricole.dto.ApplicantDTO;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -174,7 +176,6 @@ public class EmployerController {
 
 
 
-
     // tested and validated
     @PostMapping("/employee/{id}/review")
     public ResponseEntity<String> addReview(
@@ -202,5 +203,44 @@ public class EmployerController {
         return ResponseEntity.ok("Review added successfully");
     }
 
+    @GetMapping("/allApplicants")
+    public ResponseEntity<List<Map<String, Object>>> getAllApplicants(
+            @RequestHeader("Authorization") String authorizationHeader) {
 
+        int userId = extractUserIdFromToken(authorizationHeader);
+
+        Employer employer = employerService.getEmployerById(userId);
+        List<Job> jobs = employer.getJobOffers();
+
+        // Map<Job, List<ApplicantDTO>> applicants to ApplicantDTO() and their states for each job
+        Map<Job, List<ApplicantDTO>> applicantsMap = new HashMap<>();
+
+        for (Job job : jobs) {
+            List<ApplicantDTO> applicantsList = new ArrayList<>();
+            Map<Integer, ApplicationState> jobApplicants = job.getApplicants();
+
+            for (Map.Entry<Integer, ApplicationState> entry : jobApplicants.entrySet()) {
+                int applicantId = entry.getKey();
+                ApplicationState state = entry.getValue();
+                Employee employee = employeeService.getEmployeeById(applicantId);
+                ApplicantDTO applicantDTO = ObjectMapper.mapEmployeeApplicationToApplicantDTO(
+                        employee,
+                        RecommendationEngine.rankMatch(employee, job, jobService.getAllJobs()),
+                        state
+                );
+                applicantsList.add(applicantDTO);
+            }
+            applicantsMap.put(job, applicantsList);
+        }
+
+        // Convert the map to a list of JSON-friendly objects
+        List<Map<String, Object>> response = applicantsMap.entrySet().stream()
+                .map(entry -> Map.of(
+                        "job", entry.getKey(),
+                        "applicants", entry.getValue()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
 }

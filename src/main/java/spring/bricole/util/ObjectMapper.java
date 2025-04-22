@@ -3,8 +3,10 @@ package spring.bricole.util;
 import spring.bricole.common.Availability;
 import spring.bricole.common.JobCategory;
 import spring.bricole.common.Skill;
+import spring.bricole.dto.ApplicantDTO;
 import spring.bricole.dto.EmployeeResponseDTO;
 import spring.bricole.model.Employee;
+import spring.bricole.common.ApplicationState;
 import spring.bricole.model.Review;
 
 import java.util.List;
@@ -30,6 +32,15 @@ public class ObjectMapper {
                 employee.getAvailabilityDaysOfWeek(),   // Ensure this method exists in Employee
                 employee.getJobPreferences(),
                 employee.getReviews()
+        );
+    }
+
+    // Map Employee , Match and ApplicationState to EmployeeResponseDTO
+    public static ApplicantDTO mapEmployeeApplicationToApplicantDTO(Employee employee, double match, ApplicationState applicationState) {
+        return new ApplicantDTO(
+                match,
+                mapEmployeeToEmployeeResponseDTO(employee),
+                applicationState
         );
     }
 }
