@@ -195,29 +195,5 @@ public class EmployeeController {
         }
     }
 
-    // get jobs recommended for the connected employee and sorted by the rank
-    @GetMapping("/recommended/jobs")
-    public ResponseEntity<?> getRecommendedJobs(
-            @RequestHeader("Authorization") String authorizationHeader) {
-        try {
-            int userId = extractUserIdFromToken(authorizationHeader);
 
-            Employee employee = employeeService.getEmployeeById(userId);
-
-            List<Job> allJobs = jobService.getAllJobs();
-            Map<Job, Double> jobsRecommendations = RecommendationEngine.rankJobsForEmployee(employee, allJobs);
-            return ResponseEntity.ok()
-                    .body(Map.of(
-                            "status", "success",
-                            "message", "Successfully  ",
-                            "data", jobsRecommendations
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of(
-                            "status", "error",
-                            "message", "Failed to retriece recommendations" + e.getMessage()
-                    ));
-        }
-    }
 }

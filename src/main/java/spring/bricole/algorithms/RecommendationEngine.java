@@ -4,11 +4,15 @@ package spring.bricole.algorithms;
 import spring.bricole.common.AccountStatus;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobCategory;
+import spring.bricole.dto.EmployeeResponseDTO;
+import spring.bricole.dto.JobDTO;
 import spring.bricole.model.*;
 import spring.bricole.util.Address;
 
 import java.util.List;
 import java.util.Map;
+
+import spring.bricole.util.ObjectMapper;
 
 public class RecommendationEngine {
 
@@ -18,20 +22,21 @@ public class RecommendationEngine {
      Rank from 0% to 100% how much the employee fits the job
       */
 
-    public static Map<Job, Double> rankJobsForEmployee(Employee employee, List<Job> allJobs) {
-        Map<Job, Double> rankedJobs = new java.util.HashMap<>();
+    public static Map<JobDTO, Double> rankJobsForEmployee(Employee employee, List<Job> allJobs) {
+        Map<JobDTO, Double> rankedJobs = new java.util.HashMap<>();
 
         for (Job job : allJobs) {
             double rank = rankMatch(employee, job, allJobs);
-            rankedJobs.put(job, rank * 100);
+            // round the rank to 2 decimal places
+            rankedJobs.put(new JobDTO(job), rank * 100 );
         }
         // sort the map by rank
         rankedJobs = rankedJobs.entrySet()
                 .stream()
-                .sorted(Map.Entry.<Job, Double>comparingByValue().reversed())
+                .sorted(Map.Entry.<JobDTO, Double>comparingByValue(Double::compare).reversed())
                 .collect(java.util.stream.Collectors.toMap(
                         Map.Entry::getKey,
-                        Map.Entry::getValue ,
+                        Map.Entry::getValue,
                         (e1, e2) -> e1,
                         java.util.LinkedHashMap::new
                 ));
@@ -39,27 +44,27 @@ public class RecommendationEngine {
         return rankedJobs;
     }
 
-    public static Map<Employee, Double> rankEmployeesForEmployerJob( List<Employee> allEmployees , Job jobOffer , List<Job> allJobs) {
-        Map<Employee, Double> rankedEmployees = new java.util.HashMap<>();
+    public static Map<EmployeeResponseDTO, Double> rankEmployeesForEmployerJob(List<Employee> allEmployees, Job jobOffer, List<Job> allJobs) {
+        Map<EmployeeResponseDTO, Double> rankedEmployees = new java.util.HashMap<>();
 
         for (Employee employee : allEmployees) {
             double rank = rankMatch(employee, jobOffer, allJobs);
-            rankedEmployees.put(employee, rank * 100);
+            rankedEmployees.put(ObjectMapper.mapEmployeeToEmployeeResponseDTO(employee), rank * 100);
         }
-        // sort the map by rank
+
+        // Sort the map by rank
         rankedEmployees = rankedEmployees.entrySet()
                 .stream()
-                .sorted(Map.Entry.<Employee, Double>comparingByValue().reversed())
+                .sorted(Map.Entry.<EmployeeResponseDTO, Double>comparingByValue().reversed())
                 .collect(java.util.stream.Collectors.toMap(
                         Map.Entry::getKey,
-                        Map.Entry::getValue ,
+                        Map.Entry::getValue,
                         (e1, e2) -> e1,
                         java.util.LinkedHashMap::new
                 ));
 
         return rankedEmployees;
     }
-
     public static double rankMatch(Employee employee, Job job, List<Job> allJobs) {
         double matchingRank = 0.0;
 
@@ -121,7 +126,7 @@ public class RecommendationEngine {
                         0.10 * salaryScore +
                         0.10 * categoryMatchScore;
 
-        return matchingRank;
+        return  matchingRank;
     }
 
     public static double haversineDistance(Address address1, Address address2) {

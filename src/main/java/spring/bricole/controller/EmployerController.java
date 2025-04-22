@@ -203,29 +203,4 @@ public class EmployerController {
     }
 
 
-    @GetMapping("/employee/job/{id}/recommendations")
-    public ResponseEntity<?> getRecommendedEmployees(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable int id) {
-        try {
-            int userId = extractUserIdFromToken(authorizationHeader);
-
-            Employee employee = employeeService.getEmployeeById(userId);
-
-            List<Job> allJobs = jobService.getAllJobs();
-            Map<Employee, Double> employeessRecommendations = RecommendationEngine.rankEmployeesForEmployerJob(employeeService.getAllEmployees(), jobService.getJobById(id), allJobs);
-            return ResponseEntity.ok()
-                    .body(Map.of(
-                            "status", "success",
-                            "message", "Successfully  ",
-                            "data", employeessRecommendations
-                    ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of(
-                            "status", "error",
-                            "message", "Failed to retriece recommendations" + e.getMessage()
-                    ));
-        }
-    }
 }
