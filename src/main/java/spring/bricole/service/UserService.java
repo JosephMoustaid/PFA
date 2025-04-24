@@ -186,4 +186,10 @@ public class UserService {
     public void setNotificationRepository(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
+
+    public void removeNotification(User user , Notification notification) {
+        user.removeNotification(notification);
+        notificationRepository.delete(notification);
+        userRepository.save(user);
+    }
 }

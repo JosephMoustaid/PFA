@@ -118,7 +118,7 @@ public class NotificationController {
 
             for(Notification notification : user.getReceivedNotifications()) {
                 if (notification.getId() == notificationId) {
-                    user.removeNotification(notification);
+                    userService.removeNotification(notification);
                     return ResponseEntity.ok()
                             .body(Map.of(
                                     "status", "success",
