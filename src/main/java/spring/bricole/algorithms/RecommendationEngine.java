@@ -133,6 +133,7 @@ public class RecommendationEngine {
         double experienceScore = Math.min(numberOfPreviousJobsTaken / 20.0, 1.0);
         double prevRatingScore = Math.min(previousRatingFromEmployer / 5.0, 1.0);
 
+        // some code however
         // Final weighted rank (weights normalized to sum = 1.0)
         /*
         The model name is : All-MiniLM-L6-v2

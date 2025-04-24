@@ -92,6 +92,19 @@ public class JobService {
         return employeeApplications;
     }
 
+    // change application status of an employee
+    public void changeApplicationStatus(int jobId, int employeeId, ApplicationState status) {
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        Map<Integer, ApplicationState> applicants = job.getApplicants();
+        if (applicants.containsKey(employeeId)) {
+            applicants.put(employeeId, status);
+            job.setApplicants(applicants);
+            jobRepository.save(job);
+        } else {
+            throw new RuntimeException("Employee not found in the job applicants");
+        }
+    }
+
     public List<Job> findByTitle(String title) {
         return jobRepository.findByTitleOrderByCreatedAtDesc(title);
     }
@@ -128,4 +141,7 @@ public class JobService {
                 .filter(job -> job.getEmployer().getId() == employerId)
                 .collect(Collectors.toList());
     }
+
+    // change application status of an employee
+
 }

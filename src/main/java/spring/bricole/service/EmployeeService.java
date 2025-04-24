@@ -2,6 +2,9 @@ package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
 import spring.bricole.common.ApplicationState;
+import spring.bricole.common.Availability;
+import spring.bricole.common.JobCategory;
+import spring.bricole.common.Skill;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
 import spring.bricole.repository.EmployeeRepository;
@@ -77,5 +80,29 @@ public class EmployeeService {
         Map<Job, ApplicationState> appliedJobs = jobService.getApplicationsByEmployeeId(employee.getId());
 
         return appliedJobs;
+    }
+
+    // update avaialbility
+    public Employee updateEmployeeAvailability(int employeeId, Map<String, Availability> availabilityDaysOfWeek) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        employee.setAvailabilityDaysOfWeek(availabilityDaysOfWeek);
+        return employeeRepository.save(employee);
+    }
+
+    // update job preferences
+    public Employee updateJobPreferences(int employeeId, List<JobCategory> jobPreferences) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        employee.setJobPreferences(jobPreferences);
+        return employeeRepository.save(employee);
+    }
+
+    // update skills
+    public Employee updateSkills(int employeeId, List<Skill> skills) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        employee.setSkills(skills);
+        return employeeRepository.save(employee);
     }
 }

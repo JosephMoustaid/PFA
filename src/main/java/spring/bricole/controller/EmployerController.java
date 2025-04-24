@@ -74,6 +74,7 @@ public class EmployerController {
         job.setLocation(jobDto.getLocation());
 
 
+        userService.addNotification(userId,"You created a new job succesfully" );
 
 
         return ResponseEntity.ok(jobService.createJob(job) );
@@ -245,4 +246,117 @@ public class EmployerController {
 
         return ResponseEntity.ok(response);
     }
+
+    // update job
+    @PostMapping("/job/{id}/update")
+    public ResponseEntity<?> updateJob(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable int id,
+            @RequestBody JobDTO jobDto){
+        int userId = extractUserIdFromToken(authorizationHeader);
+
+        Job job = jobService.getJobById(id);
+        Employee emp = employeeService.getEmployeeById(userId);
+
+        if(job.getEmployer().getId() != userId) {
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Employee : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to update this job"
+                    )); // Forbidden
+        }
+        if (job == null) {
+            return ResponseEntity.notFound().build();
+        }
+        job.setTitle(jobDto.getTitle());
+        job.setCategory(jobDto.getCategory());
+        job.setDescription(jobDto.getDescription());
+        job.setLocation(jobDto.getLocation());
+        job.setSalary(jobDto.getSalary());
+        job.setMissions(jobDto.getMissions());
+        job.setMedia(jobDto.getMedia());
+        job.setStatus(jobDto.getStatus());
+
+        jobService.updateJob(id, job);
+
+        return ResponseEntity.ok()
+                .body(Map.of(
+                        "status", "success",
+                        "message", "Successfully updated job with title" + job.getTitle() + " with id : " + id
+                ));
+    }
+
+    // delete job
+    @DeleteMapping("/job/{id}/update")
+    public ResponseEntity<?> deleteJob(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable int id){
+        int userId = extractUserIdFromToken(authorizationHeader);
+
+        Job job = jobService.getJobById(id);
+        Employee emp = employeeService.getEmployeeById(userId);
+
+        if(job.getEmployer().getId() != userId) {
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Employee : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to delete this job"
+                    )); // Forbidden
+        }
+
+
+        jobService.deleteJobById(id);
+
+        return ResponseEntity.ok()
+                .body(Map.of(
+                        "status", "success",
+                        "message", "Successfully deleted job " + job.getTitle() + " with id : " + id
+                ));
+    }
+
+    // update application status
+    @PostMapping("/job/{id}/application/{employeeId}/updateStatus")
+    public ResponseEntity<?> updateApplicationStatus(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable int id,
+            @PathVariable int employeeId,
+            @RequestBody ApplicationState status) {
+        int userId = extractUserIdFromToken(authorizationHeader);
+
+        Job job = jobService.getJobById(id);
+        Employee emp = employeeService.getEmployeeById(userId);
+
+        if(job.getEmployer().getId() != userId) {
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Employee : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to update this job"
+                    )); // Forbidden
+        }
+
+
+        if(job.getApplicants().get(employeeId) == null) {
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Employee with id : " + employeeId + " is not an applicant for this job"
+                    )); // Forbidden
+        }
+        if(job.getApplicants().get(employeeId) == status ) {
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Employee with id : " + employeeId + " already has this status"
+                    )); // Forbidden
+        }
+        jobService.changeApplicationStatus(id, employeeId, status);
+
+        return ResponseEntity.ok()
+                .body(Map.of(
+                        "status", "success",
+                        "message", "Successfully updated application status for employee with id : " + employeeId + " to " + status
+                ));
+    }
+
+
 }
