@@ -138,4 +138,13 @@ public class Job {
         this.location = address.getLatitude() + "," + address.getLongitude();
     }
 
+    public String getCombinedText(){
+        return "Job " +
+                "\n Title : "+ title +
+                "\n Description : "+ description +
+                "\n Category : " + category +
+                "\n Status : " + status +
+                "\n missions : " + String.join(", " , this.missions);
+
+    }
 }

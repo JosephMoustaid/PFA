@@ -14,6 +14,8 @@ import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
 import spring.bricole.util.ObjectMapper;
 import spring.bricole.dto.ApplicantDTO;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -205,7 +207,7 @@ public class EmployerController {
 
     @GetMapping("/allApplicants")
     public ResponseEntity<List<Map<String, Object>>> getAllApplicants(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @RequestHeader("Authorization") String authorizationHeader) throws IOException {
 
         int userId = extractUserIdFromToken(authorizationHeader);
 

@@ -12,11 +12,11 @@ import spring.bricole.common.Availability;
 import spring.bricole.common.Gender;
 import spring.bricole.common.JobCategory;
 import spring.bricole.common.Skill;
-
 import java.time.LocalDateTime;
 
 import java.util.*;
 
+import java.util.stream.Collectors;
 @Getter
 @Setter
 @NoArgsConstructor
@@ -123,5 +123,24 @@ public class Employee extends User implements IReviewable {
         if(reviews.isEmpty())
             return 0;
         return reviews.size();
+    }
+
+    public String getCombinedText(){
+        String jobPreferencesString = jobPreferences.stream()
+                .map(Enum::name) // Convert each enum to its name
+                .collect(Collectors.joining(", "));
+        String skillsString = skills.stream()
+                .map(Enum::name) // Convert each enum to its name
+                .collect(Collectors.joining(", "));
+        String availabilityString = availabilityDaysOfWeek.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue().name())
+                .collect(Collectors.joining(", "));
+        return "Employee " +
+                "\n " + getFirstname() + " " + getLastname() +
+                "\n Gender: " + getGender() +
+                "\n Skills : " + skillsString +
+                "\n Job Preferences : " + jobPreferencesString +
+                "\n Availability : " + availabilityString ;
+
     }
 }
