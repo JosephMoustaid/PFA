@@ -23,6 +23,7 @@ public class JobDTO {
     private List<String> missions;
     private LocalDateTime createdAt;
 
+    public JobDTO() {}
 
     public JobDTO(Job job) {
         this.id = job.getId();
