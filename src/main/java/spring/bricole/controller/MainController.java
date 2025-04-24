@@ -2,6 +2,7 @@ package spring.bricole.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import spring.bricole.common.JobStatus;
 import spring.bricole.dto.EmployeeDTO;
 import spring.bricole.dto.ReviewResponse;
 import spring.bricole.model.Employee;
@@ -9,9 +10,12 @@ import spring.bricole.model.Job;
 import spring.bricole.model.Review;
 import spring.bricole.service.EmployeeService;
 import spring.bricole.service.JobService;
+import spring.bricole.util.Address;
+import spring.bricole.util.JobFilter;
 import spring.bricole.util.JwtUtil;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -250,5 +254,29 @@ public class MainController {
                 ))
                 .collect(Collectors.toSet());
         return ResponseEntity.ok(reviewsResponse);
+    }
+
+    // dynamic filtering
+    @GetMapping("/employees/search")
+    public ResponseEntity<List<Job>> searchJobs(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(required = false) String title ,
+            @RequestParam(required = false) JobStatus status,
+            @RequestParam(required = false) Boolean trending,
+            @RequestParam(required = false) Boolean sortBySalary,
+            @RequestParam(required = false) Boolean sortByMostRecent
+    ){
+
+        int userId = extractUserIdFromToken(authorizationHeader);
+        Employee employee = employeeService.getEmployeeById(userId);
+
+        List<Job> filteredJobs = jobService.searchJobs(title, status, employee.getAddressAsObject(), trending,sortBySalary, sortByMostRecent);
+        return ResponseEntity.ok()
+                .body(Map.of(
+                        "status", "success",
+                        "message", "Successfully searched for jobs with filters",
+                        "data", filteredJobs
+                ));
+        return ResponseEntity.ok(jobService);
     }
 }

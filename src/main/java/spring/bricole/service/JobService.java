@@ -4,8 +4,11 @@ import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import spring.bricole.common.ApplicationState;
+import spring.bricole.common.JobStatus;
 import spring.bricole.model.Job;
 import spring.bricole.repository.JobRepository;
+import spring.bricole.util.Address;
+import spring.bricole.util.JobFilter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -143,5 +146,26 @@ public class JobService {
     }
 
     // change application status of an employee
+    public List<Job> searchJobs(String title, JobStatus status, Address location,Boolean trending, Boolean sortBySalary , Boolean sortByMostRecent) {
+        List<Job> jobs = getAllJobs();
+        JobFilter jobFilter = new JobFilter(jobs);
 
+        if (title != null && !title.isEmpty()) {
+            jobFilter.filterByTitle(title);
+        }
+
+        if (status != null ) {
+            jobFilter.filterByStatus(status);
+        }
+        if(location != null) {
+            jobFilter.sortByAddress(location);
+        }
+        if(sortBySalary ){
+            jobFilter.sortBySalary();
+        }
+        if(sortByMostRecent){
+            jobFilter.sortByDate();
+        }
+        return jobFilter.getFilteredJobs();
+    }
 }
