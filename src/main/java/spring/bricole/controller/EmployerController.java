@@ -2,6 +2,7 @@ package spring.bricole.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.algorithms.RecommendationEngine;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobStatus;
@@ -29,6 +30,10 @@ public class EmployerController {
     private final EmployerService employerService;
     private final UserService userService;
 
+
+    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+
+
     public EmployerController(EmployerService empployerService, JobService jobService,
                               EmployeeService employeeService, EmployerService employerService,
                               UserService userService) {
@@ -51,13 +56,20 @@ public class EmployerController {
         JwtUtil.TokenValidationResult validation = JwtUtil.validateToken(token);
         return validation.userId(); // Returns the authenticated user's ID
     }
-
-    // create a new job
     @PostMapping("/job/create")
     public ResponseEntity<Job> createJob(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody JobDTO jobDto) {
+            @RequestPart("job") JobDTO jobDto,
+            @RequestPart(name = "media", required = false) MultipartFile[] mediaFiles
+    ) {
         int userId = extractUserIdFromToken(authorizationHeader);
+        Employer employer = empployerService.getEmployerById(userId);
+        if (employer == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (mediaFiles != null && mediaFiles.length > 6) {
+            throw new IllegalArgumentException("Maximum of 6 images allowed per job.");
+        }
 
 
         Job job = new Job();
@@ -66,19 +78,17 @@ public class EmployerController {
         job.setLocation(jobDto.getLocation());
         job.setSalary(jobDto.getSalary());
         job.setCategory(jobDto.getCategory());
-        job.setEmployer(empployerService.getEmployerById(userId) );
+        job.setEmployer(empployerService.getEmployerById(userId));
         job.setMissions(jobDto.getMissions());
-        job.setMedia(jobDto.getMedia());
         job.setCreatedAt(LocalDateTime.now());
         job.setStatus(JobStatus.OPEN);
-        job.setLocation(jobDto.getLocation());
 
+        jobService.storeJobMediaImages(job, employer, mediaFiles);
+        userService.addNotification(userId, "You created a new job successfully.");
 
-        userService.addNotification(userId,"You created a new job succesfully" );
-
-
-        return ResponseEntity.ok(jobService.createJob(job) );
+        return ResponseEntity.ok(jobService.createJob(job));
     }
+
 
 
     // tested and validated

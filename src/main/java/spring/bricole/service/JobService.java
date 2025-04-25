@@ -3,16 +3,27 @@ package spring.bricole.service;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.JobStatus;
+import spring.bricole.model.Employer;
 import spring.bricole.model.Job;
+import spring.bricole.model.User;
 import spring.bricole.repository.JobRepository;
 import spring.bricole.util.Address;
 import spring.bricole.util.JobFilter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +34,9 @@ public class JobService {
     public JobService(JobRepository jobRepository) {
         this.jobRepository = jobRepository;
     }
+
+    private static final String JOB_MEDIA_IMAGES_DIR = "src/main/resources/static/images/jobmedias/";
+    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
 
     // Get all jobs
     public List<Job> getAllJobs() {
@@ -167,5 +181,54 @@ public class JobService {
             jobFilter.sortByDate();
         }
         return jobFilter.getFilteredJobs();
+    }
+
+    // storeJobMedia
+    //  String mediaUrl = jobService.storeJobMedia(file); // implement this in your service
+    public void storeJobMediaImages(Job job, Employer employer , MultipartFile[] files) {
+
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if (file.getSize() > 3 * 1024 * 1024) {
+                    throw new IllegalArgumentException("Each image must be smaller than 3MB.");
+                }
+
+                if (!SUPPORTED_IMAGE_TYPES.contains(file.getContentType())) {
+                    throw new IllegalArgumentException("Unsupported file type: " + file.getContentType());
+                }
+            }
+        }
+        int i = 1;
+        for (MultipartFile file : files) {
+            String extension = getExtensionFromMimeType(file);
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String newFilename = "image-"+ i + employer.getId() + "_" + employer.getFirstname() + "_" + employer.getLastname()
+                    + "_" + timestamp + "." + extension;
+
+            // Save the new file
+            try {
+                Path newPath = Paths.get(JOB_MEDIA_IMAGES_DIR + newFilename);
+                Files.copy(file.getInputStream(), newPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save new profile image", e);
+            }
+
+            // Add media profilePicture in DB
+            job.addMedia("image"+i , newFilename);
+            i++;
+        }
+    }
+    private static final Map<String, String> MIME_TYPE_TO_EXTENSION = Map.of(
+            "image/jpg", "jpg",
+            "image/jpeg", "jpeg",
+            "image/png", "png",
+            "image/webp", "webp");
+
+    private String getExtensionFromMimeType(MultipartFile file) {
+        String mimeType = file.getContentType();
+        if (mimeType == null || !MIME_TYPE_TO_EXTENSION.containsKey(mimeType)) {
+            throw new IllegalArgumentException("Unsupported image type: " + mimeType);
+        }
+        return MIME_TYPE_TO_EXTENSION.get(mimeType);
     }
 }
