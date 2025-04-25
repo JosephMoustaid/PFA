@@ -160,10 +160,10 @@ public class JobService {
         if(location != null) {
             jobFilter.sortByAddress(location);
         }
-        if(sortBySalary ){
+        if( Boolean.TRUE.equals(sortBySalary) ){
             jobFilter.sortBySalary();
         }
-        if(sortByMostRecent){
+        if(Boolean.TRUE.equals(sortByMostRecent) ){
             jobFilter.sortByDate();
         }
         return jobFilter.getFilteredJobs();

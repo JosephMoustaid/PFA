@@ -16,6 +16,7 @@ import spring.bricole.util.Address;
 import spring.bricole.util.JobFilter;
 import spring.bricole.util.JwtUtil;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +57,31 @@ public class MainController {
         List<Job> jobs= jobService.getAllJobs();
         return ResponseEntity.ok(jobs);
     }
+
+    @GetMapping("/jobs/pag")
+    public ResponseEntity<Map<String, Object>> getPaginatedJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        List<Job> jobs = jobService.getAllJobs();
+
+        int fromIndex = Math.min(page * size, jobs.size());
+        int toIndex = Math.min(fromIndex + size, jobs.size());
+
+        List<Job> paginated = jobs.subList(fromIndex, toIndex);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Paginated jobs retrieved");
+        response.put("data", paginated);
+        response.put("currentPage", page);
+        response.put("pageSize", size);
+        response.put("totalItems", jobs.size());
+        response.put("totalPages", (int) Math.ceil((double) jobs.size() / size));
+
+        return ResponseEntity.ok(response);
+    }
+
     // get job by id
     @GetMapping("/jobs/search/{id}")
     public ResponseEntity<Job> getAllJobById(@PathVariable Integer id){
@@ -268,8 +294,8 @@ public class MainController {
             @RequestParam(required = false) String title ,
             @RequestParam(required = false) JobStatus status,
             @RequestParam(required = false) Boolean trending,
-            @RequestParam(required = false) Boolean sortBySalary,
-            @RequestParam(required = false) Boolean sortByMostRecent
+            @RequestParam(required = false, defaultValue = "TRUE") Boolean sortBySalary,
+            @RequestParam(required = false, defaultValue = "TRUE") Boolean sortByMostRecent
     ){
 
         int userId = extractUserIdFromToken(authorizationHeader);
