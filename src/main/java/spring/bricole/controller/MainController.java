@@ -6,9 +6,11 @@ import spring.bricole.common.JobStatus;
 import spring.bricole.dto.EmployeeDTO;
 import spring.bricole.dto.ReviewResponse;
 import spring.bricole.model.Employee;
+import spring.bricole.model.Employer;
 import spring.bricole.model.Job;
 import spring.bricole.model.Review;
 import spring.bricole.service.EmployeeService;
+import spring.bricole.service.EmployerService;
 import spring.bricole.service.JobService;
 import spring.bricole.util.Address;
 import spring.bricole.util.JobFilter;
@@ -25,10 +27,13 @@ public class MainController {
 
     private final EmployeeService employeeService;
     private final JobService jobService;
+    private final EmployerService employerService;
 
-    public MainController(EmployeeService employeeService, JobService jobService) {
+    public MainController(EmployeeService employeeService, JobService jobService
+    , EmployerService employerService) {
         this.employeeService = employeeService;
         this.jobService = jobService;
+        this.employerService = employerService;
     }
 
     // Helper method to extract user ID from JWT token
@@ -258,7 +263,7 @@ public class MainController {
 
     // dynamic filtering
     @GetMapping("/employees/search")
-    public ResponseEntity<List<Job>> searchJobs(
+    public ResponseEntity<?> searchJobs(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(required = false) String title ,
             @RequestParam(required = false) JobStatus status,
@@ -277,6 +282,26 @@ public class MainController {
                         "message", "Successfully searched for jobs with filters",
                         "data", filteredJobs
                 ));
-        return ResponseEntity.ok(jobService);
+    }
+
+
+    // http://10.0.2.2:8080/api/main/employer/{id} , GET
+    @GetMapping("/employer/{id}")
+    public ResponseEntity<?> getEmployerById(@PathVariable int id){
+        try {
+            Employer employer = employerService.getEmployerById(id);
+            return ResponseEntity.ok()
+                    .body(Map.of(
+                            "status", "success",
+                            "message", "Employer retrieved successfully",
+                            "data", employer
+                    ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "status", "error",
+                            "message", "Failed to retrieve employer: " + e.getMessage()
+                    ));
+        }
     }
 }
