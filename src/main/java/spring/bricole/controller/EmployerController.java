@@ -266,7 +266,7 @@ public class EmployerController {
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employee emp = employeeService.getEmployeeById(userId);
+        Employer emp = employerService.getEmployerById(userId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()
@@ -297,7 +297,7 @@ public class EmployerController {
     }
 
     // delete job
-    @DeleteMapping("/job/{id}/update")
+    @DeleteMapping("/job/{id}/delete")
     public ResponseEntity<?> deleteJob(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable int id){
