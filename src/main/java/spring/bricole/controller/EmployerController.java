@@ -212,7 +212,7 @@ public class EmployerController {
         employeeService.saveEmployee(employee);
 
         userService.addNotification(userId, "You got a new review from " + employee.getFirstname() + " " + employee.getLastname());
-
+git
         return ResponseEntity.ok("Review added successfully");
     }
 
@@ -304,13 +304,13 @@ public class EmployerController {
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employee emp = employeeService.getEmployeeById(userId);
+        Employer emp = employerService.getEmployerById(userId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()
                     .body(Map.of(
                             "status", "error",
-                            "message", "Employee : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to delete this job"
+                            "message", "Employer : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to delete this job"
                     )); // Forbidden
         }
 
@@ -334,7 +334,7 @@ public class EmployerController {
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employee emp = employeeService.getEmployeeById(userId);
+        Employer emp = employerService.getEmployerById(userId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()
@@ -367,6 +367,4 @@ public class EmployerController {
                         "message", "Successfully updated application status for employee with id : " + employeeId + " to " + status
                 ));
     }
-
-
 }
