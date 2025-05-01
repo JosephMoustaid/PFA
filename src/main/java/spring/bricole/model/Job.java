@@ -65,7 +65,10 @@ public class Job {
     @Enumerated(EnumType.STRING)
     private Map<Integer, ApplicationState> applicants = new HashMap<>();
 
-
+    @Transient
+    public Integer getEmployerId() {
+        return employer != null ? employer.getId() : null;
+    }
 
 
     // == Reviews ==
