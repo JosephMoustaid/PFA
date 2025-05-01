@@ -45,9 +45,11 @@ public class JobService {
 
     // Get job by ID
     public Job getJobById(Integer id) {
-        return jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+        return jobRepository.findByIdWithEmployer(id)
+                .orElseThrow(() -> new RuntimeException("Job not found with id " + id));
     }
+
+
 
     // Create new job
     public Job createJob(Job job) {

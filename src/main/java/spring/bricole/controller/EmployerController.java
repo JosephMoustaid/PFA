@@ -29,20 +29,21 @@ public class EmployerController {
     private final EmployeeService employeeService;
     private final EmployerService employerService;
     private final UserService userService;
-
+    private final ReviewService reviewService;
 
     private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
 
 
     public EmployerController(EmployerService empployerService, JobService jobService,
                               EmployeeService employeeService, EmployerService employerService,
-                              UserService userService) {
+                              UserService userService, ReviewService reviewService) {
         this.empployerService = empployerService;
         this.jobService = jobService;
         //
         this.employeeService = employeeService;
         this.employerService = employerService;
         this.userService = userService;
+        this.reviewService = reviewService;
     }
 
     // Helper method to extract user ID from JWT token
@@ -198,6 +199,7 @@ public class EmployerController {
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Employee employee = employeeService.getEmployeeById(id);
+        Employer employer = empployerService.getEmployerById(userId);
         if (employee == null) {
             return ResponseEntity.notFound().build();
         }
@@ -205,14 +207,22 @@ public class EmployerController {
             return ResponseEntity.badRequest().body("Rating must be between 1 and 5");
         }
        try{
-           employee.addReview(employerService.getEmployerById(userId), review.review(), review.rating());
+           Review newReview = new Review(
+                   review.review(),
+                   employer.getFirstname() + " " + employee.getLastname(),
+                   review.rating()
+           );
+           newReview.setReviewedEmployee(employee);
+           newReview.setReviewerId(userId);
+           employee.addReview(employer, newReview.getContent(), newReview.getRating());
+           reviewService.saveReview(newReview);
        }catch (InvalidPropertiesFormatException e){
               return ResponseEntity.badRequest().body("Invalid review format");
        }
         employeeService.saveEmployee(employee);
 
-        userService.addNotification(userId, "You got a new review from " + employee.getFirstname() + " " + employee.getLastname());
-git
+        userService.addNotification(userId, "You got a new review from " + employer.getFirstname() + " " + employer.getLastname());
+
         return ResponseEntity.ok("Review added successfully");
     }
 
@@ -304,13 +314,13 @@ git
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employer emp = employerService.getEmployerById(userId);
+        Employee emp = employeeService.getEmployeeById(userId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()
                     .body(Map.of(
                             "status", "error",
-                            "message", "Employer : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to delete this job"
+                            "message", "Employee : " + emp.getFirstname() + " " + emp.getLastname() + ", You are not authorized to delete this job"
                     )); // Forbidden
         }
 
@@ -334,7 +344,7 @@ git
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employer emp = employerService.getEmployerById(userId);
+        Employee emp = employeeService.getEmployeeById(userId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()
@@ -367,4 +377,6 @@ git
                         "message", "Successfully updated application status for employee with id : " + employeeId + " to " + status
                 ));
     }
+
+
 }

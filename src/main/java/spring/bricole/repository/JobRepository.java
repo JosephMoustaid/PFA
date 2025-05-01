@@ -1,10 +1,12 @@
 package spring.bricole.repository;
 
-import org.springframework.data.jdbc.repository.query.Query;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
+
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,9 @@ public interface JobRepository extends CustomJobRepository , JpaRepository<Job, 
 
     @Query("SELECT j FROM Job j WHERE j.location LIKE %:location%")
     List<Job> findByLocationContainingOrderByCreatedAtDesc(@Param("location") String location);
+
+    @Query("SELECT j FROM Job j JOIN FETCH j.employer WHERE j.id = :id")
+    Optional<Job> findByIdWithEmployer(@Param("id") int id);
 
     // find jobs by category
     List<Job> findByCategoryOrderByCategoryDesc(String category);

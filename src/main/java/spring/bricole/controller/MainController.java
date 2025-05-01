@@ -82,6 +82,7 @@ public class MainController {
         return ResponseEntity.ok(response);
     }
 
+
     // get job by id
     @GetMapping("/jobs/search/{id}")
     public ResponseEntity<Job> getAllJobById(@PathVariable Integer id){
