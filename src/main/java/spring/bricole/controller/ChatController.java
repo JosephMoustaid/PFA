@@ -24,7 +24,7 @@ import spring.bricole.dto.ChatTypingDTO;
 import spring.bricole.model.Message;
 import spring.bricole.util.JwtUtil;
 
-@CrossOrigin(origins = "http://localhost:3000")
+
 @Controller
 public class ChatController {
 
@@ -43,12 +43,11 @@ public class ChatController {
 
     // Helper method to extract user ID from JWT token
     private int extractUserIdFromToken(String authorizationHeader) {
-        if(! authorizationHeader.startsWith("Bearer ") && authorizationHeader.length() > 0){
-            // add Bearer
-            authorizationHeader = "Bearer " + authorizationHeader;
+        if (authorizationHeader == null || authorizationHeader.isBlank()) {
+            throw new RuntimeException("Invalid or missing Authorization header");
         }
-        if (authorizationHeader == null) {
-            throw new RuntimeException("Invalid or missing Authorization header : " + authorizationHeader  );
+        if (!authorizationHeader.startsWith("Bearer ")) {
+            authorizationHeader = "Bearer " + authorizationHeader;
         }
         String token = authorizationHeader.substring(7); // Remove "Bearer "
 
@@ -152,8 +151,7 @@ public class ChatController {
 
 
 
-    @MessageMapping("/chat.loadMessages")
-    @SendTo("/topic/room/{roomId}")
+    @MessageMapping("/chat.loadMessages/{roomId}")
     public List<ChatMessageResponseDTO> loadMessages(@DestinationVariable("roomId") int roomId,
                                                      @RequestHeader("Authorization") String auth) {
         // Extract user ID from the token

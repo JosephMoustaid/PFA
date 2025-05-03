@@ -179,7 +179,6 @@ public class AuthController {
         emplyer.setPhoneNumberPrefix(request.phoneNumberPrefix());
         emplyer.setPhoneNumber(request.phoneNumber());
         emplyer.setAddress(request.address());
-        emplyer.setProfilePicture(request.profilePicture());
 
         // create tokens
         Map<String, String> tokens = JwtUtil.generateTokens(emplyer.getId(), Role.EMPLOYER);

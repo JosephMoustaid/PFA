@@ -11,10 +11,12 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.web.socket.config.annotation.*;
 import spring.bricole.util.AuthHandshakeInterceptor;
+import spring.bricole.util.WebSocketHandshakeInterceptor;
 
 import spring.bricole.util.JwtUtil;
 
 @Configuration
+@EnableWebSocket
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
@@ -29,10 +31,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000") // ✅ Allow frontend origin
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new AuthHandshakeInterceptor())
-                .withSockJS();
+                .addInterceptors(new WebSocketHandshakeInterceptor());
     }
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
@@ -40,13 +40,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-
                     //  token validation
                     if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                         String token = accessor.getFirstNativeHeader("Authorization");
+                        System.out.println("Received Authorization Header: " + token);  // Debugging log
+
                         if (token != null && token.startsWith("Bearer ")) {
-                            token = token.substring(7);
+                            token = token.substring(7);  // Strip the "Bearer " part
                             JwtUtil.TokenValidationResult result = JwtUtil.validateToken(token);
                             if (result == null) throw new IllegalArgumentException("Invalid token");
 
@@ -55,9 +55,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         } else {
                             throw new IllegalArgumentException("Missing or invalid Authorization header");
                         }
-                    }
 
-                }
+                    }
                 return message;
             }
         });

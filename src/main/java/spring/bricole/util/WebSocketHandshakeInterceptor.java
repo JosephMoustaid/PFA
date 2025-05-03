@@ -22,10 +22,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             var httpRequest = servletRequest.getServletRequest();
 
-
-
-
-
             // Try to get token from Authorization header
             String token = null;
             String authHeader = httpRequest.getHeader("Authorization");
@@ -33,13 +29,13 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
             } else {
-                // Fallback to query param ?token=
+                // Fallback to query param ?token= or ?access_token=
                 String paramToken = httpRequest.getParameter("token");
-                if (paramToken != null) {
-                    // Add "Bearer " prefix if missing
-                    attributes.put("Authorization", paramToken.startsWith("Bearer ") ? paramToken : "Bearer " + paramToken);
-                } else {
-                    throw new IllegalArgumentException("Missing or invalid token");
+                if (paramToken == null) {
+                    paramToken = httpRequest.getParameter("access_token");
+                }
+                if (paramToken != null && !paramToken.isBlank()) {
+                    token = paramToken;
                 }
             }
 
@@ -60,7 +56,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         return true;
     }
 
-
     @Override
     public void afterHandshake(ServerHttpRequest request,
                                ServerHttpResponse response,
@@ -69,4 +64,3 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         // No-op
     }
 }
-
