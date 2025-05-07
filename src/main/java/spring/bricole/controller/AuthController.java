@@ -169,30 +169,33 @@ public class AuthController {
 
     @PostMapping("/employer/register")
     public ResponseEntity<AuthResponse> employerRegister(@RequestBody EmployerRegisterRequest request){
-        // save employer to database using the service
-        Employer emplyer = new Employer();
-        emplyer.setFirstname(request.firstname());
-        emplyer.setLastname(request.lastname());
-        emplyer.setEmail(request.email());
-        emplyer.setPassword(request.password());
-        emplyer.setGender(request.gender());
-        emplyer.setPhoneNumberPrefix(request.phoneNumberPrefix());
-        emplyer.setPhoneNumber(request.phoneNumber());
-        emplyer.setAddress(request.address());
+        Employer employer = new Employer();
+        employer.setFirstname(request.firstname());
+        employer.setLastname(request.lastname());
+        employer.setEmail(request.email());
+        employer.setPassword(request.password()); // hash inside setter if applicable
+        employer.setGender(request.gender());
+        employer.setPhoneNumberPrefix(request.phoneNumberPrefix());
+        employer.setPhoneNumber(request.phoneNumber());
+        employer.setAddress(request.address());
 
-        // create tokens
-        Map<String, String> tokens = JwtUtil.generateTokens(emplyer.getId(), Role.EMPLOYER);
-        // return response
+        // Save the employer to database
+        Employer savedEmployer = employerService.registerEmployer(employer);
+
+        // Generate tokens using the actual saved ID
+        Map<String, String> tokens = JwtUtil.generateTokens(savedEmployer.getId(), Role.EMPLOYER);
+
         return ResponseEntity.ok(
                 new AuthResponse(
                         tokens.get("access_token"),
                         tokens.get("refresh_token"),
-                        emplyer.getId(),
-                        emplyer.getFirstname() + " " + emplyer.getLastname(),
+                        savedEmployer.getId(),
+                        savedEmployer.getFirstname() + " " + savedEmployer.getLastname(),
                         Role.EMPLOYER.name()
                 )
         );
     }
+
 
     // reset passowrd
     @PostMapping("/reset-password")

@@ -19,7 +19,7 @@ import java.util.Set;
 @RequestMapping("/api/profile")
 public class ProfileController {
 
-    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg","image/jpg", "image/png", "image/webp");
 
     private final UserService userService;
     private final NotificationService notificationService;
