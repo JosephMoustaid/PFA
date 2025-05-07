@@ -31,7 +31,7 @@ public class EmployerController {
     private final UserService userService;
     private final ReviewService reviewService;
 
-    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of("image/jpeg","image/jpg", "image/png", "image/webp");
 
 
     public EmployerController(EmployerService empployerService, JobService jobService,
@@ -344,7 +344,7 @@ public class EmployerController {
         int userId = extractUserIdFromToken(authorizationHeader);
 
         Job job = jobService.getJobById(id);
-        Employee emp = employeeService.getEmployeeById(userId);
+        Employee emp = employeeService.getEmployeeById(employeeId);
 
         if(job.getEmployer().getId() != userId) {
             return ResponseEntity.ok()

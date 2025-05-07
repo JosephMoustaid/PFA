@@ -9,7 +9,6 @@ public record EmployerRegisterRequest(
         String phoneNumber,
         String address,
         Gender gender,
-        String profilePicture,
         String email,
         String password
 ) {
