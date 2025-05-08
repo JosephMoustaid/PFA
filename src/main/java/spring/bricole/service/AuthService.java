@@ -1,6 +1,8 @@
 package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
+import spring.bricole.common.EventType;
+import spring.bricole.common.Role;
 import spring.bricole.exceptions.UserNotFountException;
 import spring.bricole.model.Admin;
 import spring.bricole.model.Employer;
@@ -16,7 +18,9 @@ import spring.bricole.repository.UserRepository;
 import spring.bricole.service.Bcrypt;
 
 import java.util.List;
+import java.util.Map;
 
+import spring.bricole.service.EventLoggingService;
 @Service
 public class AuthService {
 
@@ -25,12 +29,15 @@ public class AuthService {
     private final AdminRepository adminRepository;
     private final UserRepository userRepository;
 
+    private final EventLoggingService eventLoggingService;
     public AuthService(EmployeeRepository employeeRepository, EmployerRepository employerRepository,
-                       AdminRepository adminRepository, UserRepository userRepository) {
+                       AdminRepository adminRepository, UserRepository userRepository,
+                       EventLoggingService eventLoggingService) {
         this.employeeRepository = employeeRepository;
         this.employerRepository = employerRepository;
         this.adminRepository = adminRepository;
         this.userRepository = userRepository;
+        this.eventLoggingService = eventLoggingService;
     }
 
 
@@ -40,6 +47,7 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFountException("User not found"));
 
         if (Bcrypt.checkPassword(rawPassword, employer.getPassword())) {
+            eventLoggingService.log(employer.getId() , Role.EMPLOYER, EventType.LOGIN, Map.of("role" , Role.EMPLOYER.toString(),"email", email));
             return employer;
         } else {
             throw new BadCredentialsException("Invalid password");
@@ -51,6 +59,7 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFountException("User not found"));
 
         if (Bcrypt.checkPassword(rawPassword, employee.getPassword())) {
+            eventLoggingService.log(employee.getId() , Role.EMPLOYEE,EventType.LOGIN, Map.of("role" , Role.EMPLOYEE.toString(),"email", email));
             return employee;
         } else {
             throw new BadCredentialsException("Invalid password");
@@ -61,6 +70,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFountException("User not found"));
         if (Bcrypt.checkPassword(password, user.getPassword())) {
+            eventLoggingService.log(user.getId() , Role.USER , EventType.LOGIN, Map.of("role" , Role.USER.toString(),"email", email));
             return user.getId();
         } else {
             throw new BadCredentialsException("Invalid password");
@@ -89,6 +99,7 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFountException("User not found"));
 
         if (Bcrypt.checkPassword(rawPassword, admin.getPassword())) {
+            eventLoggingService.log(admin.getId() , Role.ADMIN, EventType.LOGIN,  Map.of("email", email));
             return admin;
         } else {
             throw new BadCredentialsException("Invalid password");

@@ -6,7 +6,7 @@ import spring.bricole.model.*;
 import spring.bricole.repository.*;
 
 import java.util.List;
-
+import spring.bricole.service.EventLoggingService;
 @Service
 public class AdminService {
 
@@ -18,6 +18,7 @@ public class AdminService {
     public final ReviewRepository reviewRepository;
     public final UserRepository userRepository;
     public final NotificationRepository notificationRepository;
+    private final UserEventRepository userEventRepository;
 
     public AdminService(AdminRepository adminRepository,
                         EmployeeRepository employeeRepository,
@@ -26,8 +27,9 @@ public class AdminService {
                         ConversationRepository conversationRepository,
                         ReviewRepository reviewRepository,
                         UserRepository userRepository,
-                        NotificationRepository notificationRepository)
-                        {
+                        NotificationRepository notificationRepository,
+                        UserEventRepository userEventRepository)  {
+
         this.adminRepository = adminRepository;
         this.employeeRepository = employeeRepository;
         this.employerRepository = employerRepository;
@@ -36,6 +38,7 @@ public class AdminService {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
+        this.userEventRepository = userEventRepository;
     }
 
     public List<Employee> getAllEmployees(){
@@ -50,8 +53,18 @@ public class AdminService {
         List<Job> jobs = jobRepository.findAll();
         return jobs;
     }
+    public List<UserEvent> getLast100UserEvents(){
+        List<UserEvent> userEvents = userEventRepository.findTop100ByOrderByTimestampDesc();
+        return userEvents;
+    }
+    //      User Growth Timeline (Line Chart)
+    //      User demographics (Pie Chart)
 
-
-
+    public int getMaleCount(){
+       return userRepository.getMaleCount();
+    }
+    public int getFemaleCount(){
+        return userRepository.getMaleCount();
+    }
 }
 

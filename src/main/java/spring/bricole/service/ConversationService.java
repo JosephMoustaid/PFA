@@ -20,6 +20,10 @@ public class ConversationService {
         this.conversationRepository = conversationRepository;
     }
 
+    // get total number of conversations
+    public long getTotalConversations() {
+        return conversationRepository.count();
+    }
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;

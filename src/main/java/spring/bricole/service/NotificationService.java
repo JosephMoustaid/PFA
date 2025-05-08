@@ -9,7 +9,10 @@ import spring.bricole.repository.NotificationRepository;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-
+    // get total number of ntifs
+    public long getTotalNotifications() {
+        return notificationRepository.count();
+    }
     public NotificationService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }

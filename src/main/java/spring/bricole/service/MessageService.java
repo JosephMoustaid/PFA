@@ -18,6 +18,11 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 
+    // get total number of messages
+    public long getTotalMessages() {
+        return messageRepository.count();
+    }
+
     // savve the message
     public void saveMessage(Message message){
         messageRepository.save(message);

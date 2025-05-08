@@ -26,6 +26,11 @@ public class EmployeeService {
         this.jobService = jobService;
     }
 
+
+    // get total number of employees
+    public long getTotalEmployees() {
+        return employeeRepository.count();
+    }
     // Get all employees
     public List<Employee> getAllEmployees() {
 

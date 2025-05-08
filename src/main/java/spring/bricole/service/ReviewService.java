@@ -12,6 +12,10 @@ public class ReviewService {
         this.reviewRepository = reviewRepository;
     }
 
+    // get total number of reviews
+    public long getTotalReviews() {
+        return reviewRepository.count();
+    }
     public Review saveReview(Review review) {
         return reviewRepository.save(review);
     }

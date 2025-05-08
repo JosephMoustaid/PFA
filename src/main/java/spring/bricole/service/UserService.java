@@ -43,6 +43,10 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    // get toal number of users`
+    public long getTotalNumberOfUsers() {
+        return userRepository.count();
+    }
     // update user password
     public void updateUserPassword(int id, String newPassword) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));

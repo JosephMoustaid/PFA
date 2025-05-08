@@ -150,4 +150,8 @@ public class Job {
                 "\n missions : " + String.join(", " , this.missions);
 
     }
+
+    public String getCategoryString(){
+        return this.category.toString();
+    }
 }

@@ -239,4 +239,51 @@ public class AdminController {
         jobService.updateJob(id, job);
         return ResponseEntity.ok("Job updated successfully");
     }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<?> dashboard(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        verifyAdminToken(authorizationHeader);
+
+        Map<String, Long> data = new LinkedHashMap<>();
+
+
+        long totalUsers = userService.getTotalNumberOfUsers();
+        long totalJobs = jobService.getTotalNumberOfJobs();
+        long totalApplications = jobService.getTotalNumberOfApplications();
+        long totalEmployees = employeeService.getTotalEmployees();
+        long totalEmployers = employerService.getTotalEmployers();
+        long totalAcceptedApplications = jobService.getTotalNumberOfAcceptedApplicants();
+        int totalMaleCount = ( adminService.getMaleCount() = null ||
+                adminService.getMaleCount() == 0 ) ? 0 : adminService.getMaleCount();
+        int totalFemaleCount = ( adminService.getFemaleCount() = null ||
+                adminService.getFemaleCount() == 0 ) ? 0 : adminService.getFemaleCount();
+        // add data for the graphs and charts
+        //      jobs to categgory distribution
+        //      User Growth Timeline (Line Chart)
+        //      User demographics
+        Map<String, Long> distribution = jobService.getJobCategoriesDistribution();
+        List<UserEvent> last100UserEvents =  adminService.getLast100UserEvents();
+        data.put("totalUsers", totalUsers);
+        data.put("totalJobs", totalJobs);
+        data.put("totalApplications", totalApplications);
+        data.put("totalEmployees", totalEmployees);
+        data.put("totalEmployers", totalEmployers);
+        data.put("totalAcceptedApplications", totalAcceptedApplications);
+        data.put("totalMaleCount", (long) totalMaleCount);
+        data.put("totalFemaleCount", (long) totalFemaleCount);
+
+        // Construct the final JSON response
+        Map<String, Object> response = Map.of(
+                "status", "success",
+                "message", "Dashboard data fetched successfully",
+                "data", data ,
+                "jobCategoriesDistribution", distribution ,
+                "last100UserEvents", last100UserEvents
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }

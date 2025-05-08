@@ -13,6 +13,11 @@ public class EmployerService {
 
     private final EmployerRepository employerRepository;
 
+    // get total number of employers
+    public long getTotalEmployers() {
+        return employerRepository.count();
+    }
+
     public EmployerService(EmployerRepository employerRepository) {
         this.employerRepository = employerRepository;
     }

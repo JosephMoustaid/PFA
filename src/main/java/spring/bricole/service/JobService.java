@@ -49,12 +49,39 @@ public class JobService {
                 .orElseThrow(() -> new RuntimeException("Job not found with id " + id));
     }
 
-
+    // get total number of jobs
+    public long getTotalNumberOfJobs() {
+        return jobRepository.count();
+    }
 
     // Create new job
     public Job createJob(Job job) {
         // Add any business logic here (validation, etc.)
         return jobRepository.save(job);
+    }
+
+    // getTotalNumberOfApplications
+    public long getTotalNumberOfApplications() {
+        return jobRepository.findAll()
+                .stream()
+                .mapToLong(job -> job.getApplicants().size())
+                .sum();
+    }
+    // get total number of accepted applicants
+    public long getTotalNumberOfAcceptedApplicants() {
+        return jobRepository.findAll()
+                .stream()
+                .mapToLong(job -> job.getApplicants().values().stream()
+                        .filter(applicationState -> applicationState == ApplicationState.ACCEPTED)
+                        .count())
+                .sum();
+    }
+
+    // get job categories distributuion
+    public Map<String, Long> getJobCategoriesDistribution() {
+        return jobRepository.findAll()
+                .stream()
+                .collect(Collectors.groupingBy(Job::getCategoryString , Collectors.counting()));
     }
 
     // Update job

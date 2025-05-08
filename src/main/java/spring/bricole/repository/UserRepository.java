@@ -29,4 +29,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     int updateStatusById(@Param("id") int id, @Param("status") AccountStatus status);
     // get users by first name and last name
     List<User> findByFirstnameAndLastnameOrderByIdDesc(String firstname, String lastname);
+
+    // get user male/female demographics
+    @Query("SELECT COUNT(u) FROM User u WHERE u.gender = 'MALE'")
+    int getMaleCount();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.gender = 'FEMALE'")
+    int getFemaleCount();
 }
