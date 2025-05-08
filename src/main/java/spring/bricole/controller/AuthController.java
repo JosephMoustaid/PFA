@@ -3,10 +3,7 @@ package spring.bricole.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spring.bricole.common.Gender;
-import spring.bricole.dto.AuthResponse;
-import spring.bricole.dto.EmployeeRegisterRequest;
-import spring.bricole.dto.EmployerRegisterRequest;
-import spring.bricole.dto.ResetPasswordRequestDTO;
+import spring.bricole.dto.*;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Employer;
 import spring.bricole.model.User;
@@ -24,12 +21,14 @@ public class AuthController {
     private final EmployeeService employeeService;
     private final EmployerService employerService;
     private final UserService userService;
+    private final AdminService adminService;
 
-    public AuthController(AuthService authService, EmployeeService employeeService, EmployerService employerService, UserService userService) {
+    public AuthController(AuthService authService, EmployeeService employeeService, EmployerService employerService, UserService userService, AdminService adminService) {
         this.authService = authService;
         this.employeeService = employeeService;
         this.employerService = employerService;
         this.userService = userService;
+        this.adminService = adminService;
     }
 
     @PostMapping("/employer/login")
@@ -94,7 +93,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/login")
-    public ResponseEntity<AuthResponse> adminLogin(
+    public ResponseEntity<AdminAuthResponse> adminLogin(
             @RequestParam String email,
             @RequestParam String password) {
 
@@ -102,11 +101,11 @@ public class AuthController {
         Map<String, String> tokens = JwtUtil.generateTokens(admin.getId(), Role.ADMIN); // ✅ Correct line
 
         return ResponseEntity.ok(
-                new AuthResponse(
+                new AdminAuthResponse(
                         tokens.get("access_token"),
                         tokens.get("refresh_token"),
                         admin.getId(),
-                        admin.getId() + " " + admin.getEmail(),
+                        admin.getEmail(),
                         Role.ADMIN.name()
                 )
         );
@@ -227,5 +226,22 @@ public class AuthController {
             return false;
         }
         return password.matches("^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+    }
+
+    // update admin passowrd
+    @PutMapping("/admin/reset-password")
+    public ResponseEntity<String> resetAdminPassword(@RequestBody ResetPasswordRequestDTO request) {
+        String email = request.email();
+        String oldPassword = request.oldPassword();
+        String newPassword = request.newPassword();
+
+
+        if (!isValidPassword(newPassword)) {
+            return ResponseEntity.badRequest().body("New password must be at least 8 characters long and include uppercase letters, numbers, and special characters.");
+        }
+
+        authService.updateAdminPassword(email , oldPassword, newPassword);
+        // the updateUserPassword method already checks the old password
+        return ResponseEntity.ok("Password updated successfully." );
     }
 }

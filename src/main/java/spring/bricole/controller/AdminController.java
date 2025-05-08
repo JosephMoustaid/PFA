@@ -247,17 +247,15 @@ public class AdminController {
 
         Map<String, Long> data = new LinkedHashMap<>();
 
-
+        
         long totalUsers = userService.getTotalNumberOfUsers();
         long totalJobs = jobService.getTotalNumberOfJobs();
         long totalApplications = jobService.getTotalNumberOfApplications();
         long totalEmployees = employeeService.getTotalEmployees();
         long totalEmployers = employerService.getTotalEmployers();
         long totalAcceptedApplications = jobService.getTotalNumberOfAcceptedApplicants();
-        int totalMaleCount = ( adminService.getMaleCount() = null ||
-                adminService.getMaleCount() == 0 ) ? 0 : adminService.getMaleCount();
-        int totalFemaleCount = ( adminService.getFemaleCount() = null ||
-                adminService.getFemaleCount() == 0 ) ? 0 : adminService.getFemaleCount();
+        int totalMaleCount = (adminService.getMaleCount() == 0 ) ? 0 : adminService.getMaleCount();
+        int totalFemaleCount = (adminService.getFemaleCount() == 0 ) ? 0 : adminService.getFemaleCount();
         // add data for the graphs and charts
         //      jobs to categgory distribution
         //      User Growth Timeline (Line Chart)
@@ -285,5 +283,10 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("logs")
+    public ResponseEntity<List<UserEvent>> getAllLogs(){
+        List<UserEvent> logs = adminService.getAllLogs();
+        return ResponseEntity.ok(logs);
+    }
 
 }

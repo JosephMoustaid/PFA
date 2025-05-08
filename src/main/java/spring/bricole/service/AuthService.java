@@ -105,4 +105,29 @@ public class AuthService {
             throw new BadCredentialsException("Invalid password");
         }
     }
+
+
+    public Admin updateAdminPassword(String email, String rawOldPassword, String newPassword) {
+
+        Admin admin = adminRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Admin not found"));
+
+        if(rawOldPassword == null || rawOldPassword.isEmpty()){
+            throw new RuntimeException("Old password is required");
+        }
+        if(newPassword == null || newPassword.isEmpty()){
+            throw new RuntimeException("New password is required");
+        }
+        if(rawOldPassword.equals(newPassword)){
+            throw new RuntimeException("New password must be different from old password");
+        }
+
+        if (Bcrypt.checkPassword(rawOldPassword, admin.getPassword())) {
+            eventLoggingService.log(admin.getId() , Role.ADMIN, EventType.PASSWORD_RESET,  Map.of("email", email));
+            admin.setPassword(newPassword);
+            adminRepository.save(admin);
+            return admin;
+        } else {
+            throw new BadCredentialsException("Invalid password");
+        }
+    }
 }

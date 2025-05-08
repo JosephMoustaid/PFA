@@ -19,7 +19,7 @@ public interface UserEventRepository extends MongoRepository<UserEvent, String> 
 
     get latest 100 signup event for all users
      */
-
+    List<UserEvent> findAllByOrderByTimestampDesc();
     List<UserEvent> findByEventTypeOrderByTimestampDesc(String eventType);
 
     List<UserEvent> findByEventTypeAndRole(EventType eventType, Role role);

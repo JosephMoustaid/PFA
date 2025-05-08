@@ -66,5 +66,12 @@ public class AdminService {
     public int getFemaleCount(){
         return userRepository.getMaleCount();
     }
+
+    public List<UserEvent> getAllLogs() {
+        List<UserEvent> logs = userEventRepository.findAllByOrderByTimestampDesc();
+        return logs;
+    }
+
+
 }
 
