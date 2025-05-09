@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import spring.bricole.common.AccountStatus;
 import spring.bricole.common.ApplicationState;
 import spring.bricole.common.Role;
+import spring.bricole.dto.EmployeeResponseDTO;
 import spring.bricole.dto.JobApplicantDTO;
 import spring.bricole.dto.JobApplicationDTO;
 import spring.bricole.dto.JobDTO;
@@ -12,6 +13,7 @@ import spring.bricole.model.*;
 import spring.bricole.service.*;
 import spring.bricole.util.JwtUtil;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,9 +286,47 @@ public class AdminController {
     }
 
     @GetMapping("logs")
-    public ResponseEntity<List<UserEvent>> getAllLogs(){
+    public ResponseEntity<List<UserEvent>> getAllLogs(
+            @RequestHeader("Authorization") String authorizationHeader){
+        verifyAdminToken(authorizationHeader);
+
+
         List<UserEvent> logs = adminService.getAllLogs();
         return ResponseEntity.ok(logs);
     }
 
+
+    @GetMapping("/job/{id}/applications")
+    public ResponseEntity<Map<EmployeeResponseDTO, ApplicationState>> getJobApplicants(
+            @RequestHeader("Authorization") String authorizationHeader ,
+            @PathVariable Integer id) {
+        verifyAdminToken(authorizationHeader);
+
+        Job job = jobService.getJobById(id);
+
+        Map<Integer, ApplicationState> jobApplicants = job.getApplicants();
+
+        Map<EmployeeResponseDTO, ApplicationState> applicants = new HashMap<>();
+
+        for (Map.Entry<Integer, ApplicationState> entry : jobApplicants.entrySet()) {
+            int applicantId = entry.getKey();
+            ApplicationState state = entry.getValue();
+            Employee employee = employeeService.getEmployeeById(applicantId);
+            EmployeeResponseDTO employeeDTO = new EmployeeResponseDTO(
+                    applicantId,
+                    employee.getFirstname(),
+                    employee.getLastname(),
+                    employee.getPhoneNumberPrefix(),
+                    employee.getPhoneNumber(),
+                    employee.getSkills(),
+                    employee.getProfilePicture(),
+                    employee.getAvailabilityDaysOfWeek(),
+                    employee.getJobPreferences(),
+                    employee.getReviews()
+            );
+            applicants.put(employeeDTO, state);
+        }
+        return ResponseEntity.ok(applicants);
+
+    }
 }
