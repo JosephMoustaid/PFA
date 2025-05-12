@@ -1,10 +1,7 @@
 package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
-import spring.bricole.common.ApplicationState;
-import spring.bricole.common.Availability;
-import spring.bricole.common.JobCategory;
-import spring.bricole.common.Skill;
+import spring.bricole.common.*;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
 import spring.bricole.repository.EmployeeRepository;
@@ -18,12 +15,14 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final JobService jobService;
-
+    private final EventLoggingService eventLoggingService;
     // Constructor injection
     public EmployeeService(EmployeeRepository employeeRepository,
-                           JobService jobService) {
+                           JobService jobService,
+                           EventLoggingService eventLoggingService) {
         this.employeeRepository = employeeRepository;
         this.jobService = jobService;
+        this.eventLoggingService = eventLoggingService;
     }
 
 
@@ -46,6 +45,7 @@ public class EmployeeService {
     // Register new employee
     public Employee registerEmployee(Employee employee) {
         // Add any business logic here (validation, password hashing, etc.)
+        eventLoggingService.log(employee.getId(), Role.EMPLOYEE , EventType.SIGNUP, Map.of("email", employee.getEmail()));
         return employeeRepository.save(employee);
     }
 
@@ -83,7 +83,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
         Map<Job, ApplicationState> appliedJobs = jobService.getApplicationsByEmployeeId(employee.getId());
-
+        eventLoggingService.log(employeeId, Role.EMPLOYEE, EventType.FETCHED_APPLICATIONS, Map.of("action" , "fetched applications to jobs") );
         return appliedJobs;
     }
 
@@ -92,6 +92,8 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
         employee.setAvailabilityDaysOfWeek(availabilityDaysOfWeek);
+
+        eventLoggingService.log(employeeId, Role.EMPLOYEE, EventType.UPDATE_AVAILABILITY, Map.of("action" , "updated availability") );
         return employeeRepository.save(employee);
     }
 
@@ -100,6 +102,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
         employee.setJobPreferences(jobPreferences);
+        eventLoggingService.log(employeeId, Role.EMPLOYEE, EventType.UPDATE_JOB_PREFERENCES, Map.of("action" , "updated job preferences"));
         return employeeRepository.save(employee);
     }
 
@@ -108,6 +111,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
         employee.setSkills(skills);
+        eventLoggingService.log(employeeId, Role.EMPLOYEE, EventType.UPDATE_SKILLS, Map.of("action" , "updated skills"));
         return employeeRepository.save(employee);
     }
 }

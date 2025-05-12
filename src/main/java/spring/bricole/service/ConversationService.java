@@ -2,10 +2,13 @@ package spring.bricole.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import spring.bricole.common.EventType;
+import spring.bricole.common.Role;
 import spring.bricole.model.Conversation;
 import spring.bricole.repository.ConversationRepository;
 
 import java.util.List;
+import java.util.Map;
 
 import spring.bricole.model.User;
 import spring.bricole.repository.UserRepository;
@@ -15,9 +18,11 @@ public class ConversationService {
 
     private final ConversationRepository conversationRepository;
     private UserRepository userRepository;
-
-    public ConversationService(ConversationRepository conversationRepository) {
+    private final EventLoggingService eventLoggingService;
+    public ConversationService(ConversationRepository conversationRepository,
+                               EventLoggingService eventLoggingService) {
         this.conversationRepository = conversationRepository;
+        this.eventLoggingService = eventLoggingService;
     }
 
     // get total number of conversations
@@ -63,6 +68,9 @@ public class ConversationService {
         conversation.setUser2(user2);
         conversation.setLastMessage("");
         conversation.setLastMessageAt(null);
+
+        eventLoggingService.log(conversation.getUser1().getId(), Role.USER, EventType.NEW_CONVERSATION , Map.of("user1Id", user1Id
+                , "user2Id", user2Id));
         return conversationRepository.save(conversation);
     }
 }

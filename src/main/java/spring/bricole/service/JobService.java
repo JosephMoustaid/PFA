@@ -1,11 +1,14 @@
 package spring.bricole.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.common.ApplicationState;
+import spring.bricole.common.EventType;
 import spring.bricole.common.JobStatus;
+import spring.bricole.common.Role;
 import spring.bricole.model.Employer;
 import spring.bricole.model.Job;
 import spring.bricole.model.User;
@@ -26,13 +29,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class JobService {
 
     private final JobRepository jobRepository;
-
-    public JobService(JobRepository jobRepository) {
+    private final EventLoggingService eventLoggingService;
+    public JobService(JobRepository jobRepository
+            , EventLoggingService eventLoggingService) {
         this.jobRepository = jobRepository;
+        this.eventLoggingService = eventLoggingService;
     }
 
     private static final String JOB_MEDIA_IMAGES_DIR = "src/main/resources/static/images/jobmedias/";
@@ -57,6 +63,7 @@ public class JobService {
     // Create new job
     public Job createJob(Job job) {
         // Add any business logic here (validation, etc.)
+        eventLoggingService.log(job.getEmployer().getId(), Role.EMPLOYER, EventType.JOB_OFFER_CREATION, Map.of("jobTitle", job.getTitle()));
         return jobRepository.save(job);
     }
 
@@ -95,6 +102,8 @@ public class JobService {
         job.setSalary(jobDetails.getSalary());
         job.setCreatedAt(jobDetails.getCreatedAt());
         job.setApplicants(jobDetails.getApplicants());
+
+        eventLoggingService.log(id, Role.EMPLOYER, EventType.JOB_OFFER_UPDATE, Map.of("jobId", id , "jobTitle", job.getTitle()));
         return jobRepository.save(job);
     }
 
@@ -102,6 +111,7 @@ public class JobService {
     public boolean deleteJobById(Integer id) {
         if(jobRepository.existsById(id)) {
             jobRepository.deleteById(id);
+            eventLoggingService.log(id, Role.EMPLOYER, EventType.JOB_OFFER_DELETION, Map.of("jobId", id , "jobTitle", jobRepository.findById(id).get().getTitle()));
             return true;
         } else {
             return false;
@@ -112,6 +122,7 @@ public class JobService {
     public boolean deleteJobById(int id) {
         if(jobRepository.existsById(id)){
             jobRepository.deleteById(id);
+            eventLoggingService.log(id, Role.EMPLOYER, EventType.JOB_OFFER_DELETION, Map.of("jobId", id , "jobTitle", jobRepository.findById(id).get().getTitle()));
             return true;
         }
         return false;
@@ -146,6 +157,12 @@ public class JobService {
             applicants.put(employeeId, status);
             job.setApplicants(applicants);
             jobRepository.save(job);
+            if(status == ApplicationState.ACCEPTED) {
+                eventLoggingService.log(jobId , Role.EMPLOYER, EventType.ACCEPT_APPLICATION, Map.of("jobId", jobId , "employeeId", employeeId));
+            }
+            else if(status == ApplicationState.REJECTED) {
+                eventLoggingService.log(jobId , Role.EMPLOYER, EventType.REJECT_APPLICATION, Map.of("jobId", jobId , "employeeId", employeeId));
+            }
         } else {
             throw new RuntimeException("Employee not found in the job applicants");
         }
@@ -246,6 +263,8 @@ public class JobService {
             job.addMedia("image"+i , newFilename);
             i++;
         }
+        jobRepository.save(job);
+        eventLoggingService.log(employer.getId(), Role.EMPLOYER, EventType.JOB_OFFER_MEDIA_UPLOAD, Map.of("jobId", job.getId() , "jobTitle", job.getTitle()));
     }
     private static final Map<String, String> MIME_TYPE_TO_EXTENSION = Map.of(
             "image/jpg", "jpg",

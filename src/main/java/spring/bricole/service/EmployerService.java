@@ -1,25 +1,30 @@
 package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
+import spring.bricole.common.EventType;
+import spring.bricole.common.Role;
 import spring.bricole.model.Employer;
 import spring.bricole.model.Job;
 import spring.bricole.repository.EmployerRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class EmployerService {
 
     private final EmployerRepository employerRepository;
-
+    private final EventLoggingService eventLoggingService;
     // get total number of employers
     public long getTotalEmployers() {
         return employerRepository.count();
     }
 
-    public EmployerService(EmployerRepository employerRepository) {
+    public EmployerService(EmployerRepository employerRepository,
+                           EventLoggingService eventLoggingService) {
         this.employerRepository = employerRepository;
+        this.eventLoggingService = eventLoggingService;
     }
 
     // Get all employers
@@ -36,6 +41,7 @@ public class EmployerService {
     // Register new employer
     public Employer registerEmployer(Employer employer) {
         // Add any business logic here (validation, etc.)
+        eventLoggingService.log(employer.getId() , Role.EMPLOYER , EventType.SIGNUP, Map.of("email", employer.getEmail()));
         return employerRepository.save(employer);
     }
 

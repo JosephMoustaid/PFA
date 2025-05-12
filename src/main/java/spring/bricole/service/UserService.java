@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import spring.bricole.common.AccountStatus;
+import spring.bricole.common.EventType;
+import spring.bricole.common.Role;
 import spring.bricole.dto.UserResponseDTO;
 import spring.bricole.dto.UserUpdateDTO;
 import spring.bricole.model.Notification;
@@ -25,12 +27,16 @@ import java.util.Map;
 public class UserService {
     private static final String PROFILE_IMAGE_DIR = "src/main/resources/static/images/profile/";
 
+
     private final UserRepository userRepository;
     private ConversationService conversationService;
     private NotificationRepository notificationRepository;
+    private EventLoggingService eventLoggingService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       EventLoggingService eventLoggingService) {
         this.userRepository = userRepository;
+        this.eventLoggingService = eventLoggingService;
     }
 
     @Autowired
@@ -95,12 +101,13 @@ public class UserService {
 
     public void updateUserAccountStatus(int id, AccountStatus status) {
         int updatedCount = userRepository.updateStatusById(id, status);
+        eventLoggingService.log(id, Role.USER , EventType.ACCOUNT_STATUS_UPDATE, Map.of("status", status.toString()));
         if (updatedCount == 0) {
             throw new RuntimeException("No user found with id: " + id);
         }
     }
 
-    // delete a user , you need to delete all the conversations of that user
+    // we dont wanna allow for deleting users currently
     public void deleteUser(int id) {
 
     }
@@ -144,6 +151,7 @@ public class UserService {
 
 
         userRepository.save(user);
+        eventLoggingService.log(id, Role.USER, EventType.PROFILE_UPDATE, Map.of("action", "updated profile"));
 
         return getUserProfile(id);
     }
@@ -182,6 +190,7 @@ public class UserService {
         user.setProfilePicture(newFilename);
         userRepository.save(user);
 
+        eventLoggingService.log(userId, Role.USER, EventType.PROFILE_IMAGE_UPDATE, Map.of("action", "updated profile image"));
         // 6. Return DTO
         return mapToUserResponseDTO(user);
     }
