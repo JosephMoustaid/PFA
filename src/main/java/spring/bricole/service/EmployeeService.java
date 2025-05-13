@@ -2,9 +2,12 @@ package spring.bricole.service;
 
 import org.springframework.stereotype.Service;
 import spring.bricole.common.*;
+import spring.bricole.model.Conversation;
 import spring.bricole.model.Employee;
 import spring.bricole.model.Job;
+import spring.bricole.model.Review;
 import spring.bricole.repository.EmployeeRepository;
+import spring.bricole.repository.ReviewRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -16,13 +19,20 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final JobService jobService;
     private final EventLoggingService eventLoggingService;
+    private final ReviewRepository reviewRepository;
+    private final ConversationService conversationService;
+
     // Constructor injection
     public EmployeeService(EmployeeRepository employeeRepository,
                            JobService jobService,
-                           EventLoggingService eventLoggingService) {
+                           EventLoggingService eventLoggingService,
+                           ReviewRepository reviewRepository,
+                           ConversationService conversationService) {
         this.employeeRepository = employeeRepository;
         this.jobService = jobService;
         this.eventLoggingService = eventLoggingService;
+        this.reviewRepository = reviewRepository;
+        this.conversationService = conversationService;
     }
 
 
@@ -56,6 +66,15 @@ public class EmployeeService {
 
     public boolean deleteEmployeeById(Integer id) {
         if (employeeRepository.existsById(id)) {
+            Employee emp = employeeRepository.findById(id).orElse(null);
+            // delete employee reviews
+            for(Review r : emp.getReviews()) {
+                reviewRepository.deleteById(r.getId());
+            }
+            // delete emoloyee conversations
+            for (Conversation c : conversationService.getAllConversationsByUserId(emp.getId())){
+                conversationService.deleteConversationById(c.getId());
+            }
             employeeRepository.deleteById(id);
             return true;
         } else {

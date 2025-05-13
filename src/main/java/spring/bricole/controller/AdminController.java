@@ -329,4 +329,18 @@ public class AdminController {
         return ResponseEntity.ok(applicants);
 
     }
+
+    @PutMapping("/user/{id}/ban")
+    public ResponseEntity<String> banUser(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Integer id) {
+        verifyAdminToken(authorizationHeader);
+        User user = userService.getUserById(id);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        user.setStatus(AccountStatus.BANNED);
+        userService.updateUserAccountStatus(id, AccountStatus.BANNED);
+        return ResponseEntity.ok("User banned successfully");
+    }
 }

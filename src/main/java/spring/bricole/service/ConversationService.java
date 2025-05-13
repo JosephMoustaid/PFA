@@ -73,4 +73,12 @@ public class ConversationService {
                 , "user2Id", user2Id));
         return conversationRepository.save(conversation);
     }
+
+    public boolean deleteConversationById(int conversationId) {
+        if (conversationRepository.existsById(conversationId)) {
+            conversationRepository.deleteById(conversationId);
+            return true;
+        }
+        return false;
+    }
 }
