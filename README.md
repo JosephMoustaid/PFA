@@ -1,3 +1,4 @@
+
 # PFA (Projet de Fin d’Année)
 
 This repo is for my **PFA (Projet de Fin d’Année)** — my 4th-year final project.
@@ -60,3 +61,72 @@ Follow these steps to get the project up and running locally:
    ```bash
    git clone https://github.com/JosephMoustaid/PFA.git
    cd PFA
+````
+
+2. Backend setup (Java):
+
+   * Make sure you have Java SDK & Maven installed.
+   * Run `mvn clean install` to build.
+   * Use the `.mvn` wrapper to ease setup if you prefer.
+
+3. NLP model server:
+
+   * Go to the related repo: `allMini-LLM-l6-v2--flask-server-for-NLP-processing`.
+   * Install dependencies (e.g. with `pip install -r requirements.txt`).
+   * Run the NLP server (`python main.py`) — it should listen on port 5000.
+
+4. Example React chat client (demo):
+
+   * Visit the React example repo: `React-Chat-API-Test`.
+   * Install its dependencies (`npm install` / `yarn`).
+   * Run it to connect to your API + NLP server to see chat functionality.
+
+---
+
+## Usage
+
+Here are some example usage flows:
+
+* Call any of the API endpoints to manage data (depending on what the project supports: create, read, update, delete, etc.).
+* Send requests through the React client demo to test chat and recommendation functionality.
+* Use the NLP server separately to generate recommendations; endpoints should redirect or call it as required by the backend.
+
+---
+
+## API Reference
+
+*(You should fill this in with your actual endpoints, parameters, request/response formats. Here's a starter example.)*
+
+| Endpoint         | Method | Description                         |
+| ---------------- | ------ | ----------------------------------- |
+| `/api/login`     | POST   | Authenticate user                   |
+| `/api/items`     | GET    | Get list of items                   |
+| `/api/items/:id` | GET    | Get a single item by ID             |
+| `/api/recommend` | POST   | Get recommendations via NLP service |
+
+> ⚠️ Be sure to update with actual routes and schemas.
+
+---
+
+## Contributing
+
+If you want to contribute:
+
+1. Fork the repo
+2. Create a new branch (`git checkout -b feature/YourFeatureName`)
+3. Make your changes & tests
+4. Commit, push, and open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the *\[Your License Choice]*. (e.g. MIT, Apache 2.0, etc.)
+
+---
+
+## Contact
+
+* **Author:** Joseph Moustaid
+* **GitHub:** [@JosephMoustaid](https://github.com/JosephMoustaid)
+
